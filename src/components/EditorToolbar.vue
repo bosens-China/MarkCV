@@ -1,6 +1,7 @@
 <template>
-  <header class="h-16 border-b border-gray-200 bg-white flex items-center px-4 justify-between flex-shrink-0 z-10 sticky top-0 no-print shadow-sm gap-4">
-    
+  <header
+    class="h-16 border-b border-gray-200 bg-white flex items-center px-4 justify-between flex-shrink-0 z-10 sticky top-0 no-print shadow-sm gap-4"
+  >
     <!-- ================================================= -->
     <!-- 左侧：导航与元数据 -->
     <!-- ================================================= -->
@@ -15,7 +16,7 @@
         </template>
         返回仪表盘
       </n-tooltip>
-      
+
       <div class="h-6 w-px bg-gray-200 mx-1"></div>
 
       <div class="flex flex-col justify-center min-w-0">
@@ -28,13 +29,20 @@
           class="font-semibold text-base min-w-[200px] hover:bg-gray-50 -ml-2"
         />
         <!-- 保存状态指示器 (Notion 风格) -->
-        <div 
+        <div
           class="text-[10px] flex items-center gap-1.5 cursor-pointer select-none transition-colors -ml-1 px-1 rounded hover:bg-gray-100 w-fit"
           :class="hasUnsavedChanges ? 'text-amber-600' : 'text-gray-400'"
           @click="$emit('save')"
         >
-          <div :class="hasUnsavedChanges ? 'i-lucide:cloud-off' : 'i-lucide:cloud-check'" class="text-xs" />
-          <span>{{ hasUnsavedChanges ? '有未保存更改 (点击保存)' : '已自动保存' }}</span>
+          <div
+            :class="
+              hasUnsavedChanges ? 'i-lucide:cloud-off' : 'i-lucide:cloud-check'
+            "
+            class="text-xs"
+          />
+          <span>{{
+            hasUnsavedChanges ? '有未保存更改 (点击保存)' : '已自动保存'
+          }}</span>
         </div>
       </div>
     </div>
@@ -43,29 +51,34 @@
     <!-- 右侧：工具区 -->
     <!-- ================================================= -->
     <div class="flex items-center gap-2">
-      
       <!-- 显式保存按钮 -->
       <n-tooltip trigger="hover">
         <template #trigger>
-          <n-button 
-            size="small" 
+          <n-button
+            size="small"
             :type="hasUnsavedChanges ? 'primary' : 'default'"
             :secondary="!hasUnsavedChanges"
+            :disabled="!hasUnsavedChanges"
             @click="$emit('save')"
           >
             <template #icon>
-              <div :class="hasUnsavedChanges ? 'i-lucide:save' : 'i-lucide:check'" />
+              <div
+                :class="hasUnsavedChanges ? 'i-lucide:save' : 'i-lucide:check'"
+              />
             </template>
             {{ hasUnsavedChanges ? '保存' : '已保存' }}
           </n-button>
         </template>
-        {{ hasUnsavedChanges ? '保存更改并创建历史快照' : '所有更改已保存（点击可强制创建快照）' }}
+        {{ hasUnsavedChanges ? '保存更改并创建历史快照' : '所有更改已保存' }}
       </n-tooltip>
-
       <div class="h-6 w-px bg-gray-200 mx-1"></div>
-      
+
       <!-- 1. 写作辅助 -->
-      <n-dropdown trigger="click" :options="snippetOptions" @select="(key: string) => $emit('insert-snippet', key)">
+      <n-dropdown
+        trigger="click"
+        :options="snippetOptions"
+        @select="(key: string) => $emit('insert-snippet', key)"
+      >
         <n-button size="small" secondary>
           <template #icon>
             <div class="i-lucide:layout-template" />
@@ -75,7 +88,13 @@
       </n-dropdown>
 
       <!-- 2. 外观设置 (Popver 收纳) -->
-      <n-popover trigger="click" placement="bottom" :show-arrow="false" raw style="padding: 0;">
+      <n-popover
+        trigger="click"
+        placement="bottom"
+        :show-arrow="false"
+        raw
+        style="padding: 0"
+      >
         <template #trigger>
           <n-button size="small" secondary>
             <template #icon>
@@ -84,43 +103,58 @@
             外观设置
           </n-button>
         </template>
-        
+
         <!-- 外观面板内容 -->
-        <div class="w-72 bg-white rounded-lg shadow-xl border border-gray-100 p-4 flex flex-col gap-5">
-          
+        <div
+          class="w-72 bg-white rounded-lg shadow-xl border border-gray-100 p-4 flex flex-col gap-5"
+        >
           <!-- 主题色 -->
           <div class="flex flex-col gap-2">
-            <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">主题色</span>
+            <span
+              class="text-xs font-bold text-gray-500 uppercase tracking-wider"
+              >主题色</span
+            >
             <div class="flex flex-wrap gap-2">
               <div
                 v-for="color in THEME_COLORS"
                 :key="color.value"
                 class="w-6 h-6 rounded-full cursor-pointer flex items-center justify-center transition-transform hover:scale-110"
                 :style="{ backgroundColor: color.value }"
-                :class="{ 'ring-2 ring-offset-2 ring-gray-300': themeColor === color.value }"
+                :class="{
+                  'ring-2 ring-offset-2 ring-gray-300':
+                    themeColor === color.value,
+                }"
                 :title="color.label"
                 @click="$emit('update:themeColor', color.value)"
               >
-                <div v-if="themeColor === color.value" class="i-lucide:check text-white text-xs drop-shadow-md" />
+                <div
+                  v-if="themeColor === color.value"
+                  class="i-lucide:check text-white text-xs drop-shadow-md"
+                />
               </div>
             </div>
           </div>
 
           <!-- 排版设置 -->
           <div class="flex flex-col gap-3">
-            <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">排版</span>
-            
+            <span
+              class="text-xs font-bold text-gray-500 uppercase tracking-wider"
+              >排版</span
+            >
+
             <div class="grid grid-cols-2 gap-3">
               <div class="flex flex-col gap-1">
                 <span class="text-xs text-gray-400">页面边距</span>
                 <n-select
                   :value="pageMargin"
                   @update:value="$emit('update:pageMargin', $event)"
-                  :options="MARGIN_OPTIONS.map(m => ({ label: `${m}mm`, value: m }))"
+                  :options="
+                    MARGIN_OPTIONS.map((m) => ({ label: `${m}mm`, value: m }))
+                  "
                   size="small"
                 />
               </div>
-              
+
               <div class="flex flex-col gap-1">
                 <span class="text-xs text-gray-400">行高</span>
                 <n-select
@@ -151,9 +185,12 @@
               <div class="i-lucide:code text-gray-400" />
               <span class="text-sm text-gray-700">CSS 编辑器</span>
             </div>
-            <n-switch :value="showCssPane" @update:value="$emit('update:showCssPane', $event)" size="small" />
+            <n-switch
+              :value="showCssPane"
+              @update:value="$emit('update:showCssPane', $event)"
+              size="small"
+            />
           </div>
-
         </div>
       </n-popover>
 
@@ -162,7 +199,12 @@
       <!-- 3. 功能按钮组 -->
       <n-tooltip trigger="hover">
         <template #trigger>
-          <n-button quaternary circle size="small" @click="$emit('show-history')">
+          <n-button
+            quaternary
+            circle
+            size="small"
+            @click="$emit('show-history')"
+          >
             <template #icon>
               <div class="i-lucide:history text-gray-500" />
             </template>
@@ -173,7 +215,24 @@
 
       <n-tooltip trigger="hover">
         <template #trigger>
-          <n-button quaternary circle size="small" @click="$emit('export-markdown')">
+          <n-button quaternary circle size="small" @click="$emit('copy')">
+            <template #icon>
+              <div class="i-lucide:copy text-gray-500" />
+            </template>
+          </n-button>
+        </template>
+
+        复制 Markdown
+      </n-tooltip>
+
+      <n-tooltip trigger="hover">
+        <template #trigger>
+          <n-button
+            quaternary
+            circle
+            size="small"
+            @click="$emit('export-markdown')"
+          >
             <template #icon>
               <div class="i-lucide:file-down text-gray-500" />
             </template>
@@ -183,7 +242,13 @@
       </n-tooltip>
 
       <!-- 导出 PDF (主按钮) -->
-      <n-button type="primary" size="small" @click="$emit('print')" :loading="isRendering" class="ml-1">
+      <n-button
+        type="primary"
+        size="small"
+        @click="$emit('print')"
+        :loading="isRendering"
+        class="ml-1"
+      >
         <template #icon>
           <div class="i-lucide:download" />
         </template>
@@ -215,8 +280,8 @@ const snippetOptions: DropdownOption[] = [
       {
         label: '三栏布局 (3-cols)',
         key: '\n:::: cols-3\n<div>\n\n</div>\n<div>\n\n</div>\n<div>\n\n</div>\n::::\n',
-      }
-    ]
+      },
+    ],
   },
   {
     type: 'group',
@@ -235,8 +300,8 @@ const snippetOptions: DropdownOption[] = [
         label: '右对齐 (right)',
         key: '\n::: right\n\n:::\n',
       },
-    ]
-  }
+    ],
+  },
 ];
 
 defineProps<{

@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
+import localforage from 'localforage';
 
 export interface ResumeHistoryItem {
   timestamp: number;
@@ -22,6 +23,39 @@ export interface Resume {
 
 export const useResumeStore = defineStore('resume', () => {
   const resumes = ref<Resume[]>([]);
+  const isReady = ref(false);
+
+  // 初始化存储配置
+  localforage.config({
+    name: 'mark-cv',
+    storeName: 'resumes',
+  });
+
+  async function init() {
+    try {
+      const stored = await localforage.getItem<Resume[]>('resumes-data');
+      if (stored) {
+        resumes.value = stored;
+      }
+    } catch (e) {
+      console.error('从存储加载简历失败:', e);
+    } finally {
+      isReady.value = true;
+    }
+  }
+
+  // 显式保存逻辑
+  async function saveData() {
+    try {
+      // 序列化为普通对象以避免潜在的代理问题
+      await localforage.setItem(
+        'resumes-data',
+        JSON.parse(JSON.stringify(resumes.value)),
+      );
+    } catch (e) {
+      console.error('保存简历到存储失败:', e);
+    }
+  }
 
   function addResume() {
     const id = crypto.randomUUID();
@@ -73,17 +107,20 @@ export const useResumeStore = defineStore('resume', () => {
   }
 
   function getResume(id: string) {
-    return resumes.value.find(r => r.id === id);
+    return resumes.value.find((r) => r.id === id);
   }
 
-  function updateResume(id: string, updates: Partial<Omit<Resume, 'id' | 'history'>>) {
-    const index = resumes.value.findIndex(r => r.id === id);
+  function updateResume(
+    id: string,
+    updates: Partial<Omit<Resume, 'id' | 'history'>>,
+  ) {
+    const index = resumes.value.findIndex((r) => r.id === id);
     if (index !== -1) {
       const current = resumes.value[index];
       if (!current) return;
-      
+
       const now = Date.now();
-      
+
       resumes.value[index] = {
         ...current,
         ...updates,
@@ -93,20 +130,21 @@ export const useResumeStore = defineStore('resume', () => {
   }
 
   function deleteResume(id: string) {
-    const index = resumes.value.findIndex(r => r.id === id);
+    const index = resumes.value.findIndex((r) => r.id === id);
     if (index !== -1) {
       resumes.value.splice(index, 1);
     }
   }
 
   function addHistorySnapshot(id: string) {
-    const index = resumes.value.findIndex(r => r.id === id);
+    const index = resumes.value.findIndex((r) => r.id === id);
     if (index !== -1) {
       const current = resumes.value[index];
       if (!current) return;
-      
+
       const newHistory = [...(current.history || [])];
-      const lastHistory = newHistory.length > 0 ? newHistory[newHistory.length - 1] : null;
+      const lastHistory =
+        newHistory.length > 0 ? newHistory[newHistory.length - 1] : null;
       const now = Date.now();
 
       if (!lastHistory || lastHistory.content !== current.content) {
@@ -133,7 +171,7 @@ export const useResumeStore = defineStore('resume', () => {
   }
 
   function setActiveVersion(id: string, timestamp: number) {
-    const index = resumes.value.findIndex(r => r.id === id);
+    const index = resumes.value.findIndex((r) => r.id === id);
     if (index !== -1) {
       const current = resumes.value[index];
       if (current) {
@@ -144,6 +182,9 @@ export const useResumeStore = defineStore('resume', () => {
 
   return {
     resumes,
+    isReady,
+    init,
+    saveData,
     addResume,
     getResume,
     updateResume,
@@ -151,6 +192,4 @@ export const useResumeStore = defineStore('resume', () => {
     addHistorySnapshot,
     setActiveVersion,
   };
-}, {
-  persist: true,
 });

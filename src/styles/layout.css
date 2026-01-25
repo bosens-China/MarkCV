@@ -1,0 +1,146 @@
+/* ==========================================================================
+   MarkCV - 布局辅助类
+   自定义容器语法的样式实现
+   ========================================================================== */
+
+/* ==========================================================================
+   行布局容器 - 左右分布排列
+   用法: ::: row
+   ========================================================================== */
+
+.layout-row {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: space-between !important;
+  align-items: baseline !important;
+  gap: 16px;
+  width: 100%;
+  margin-bottom: 2px;
+  /* 防止跨页断开 */
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+/* ==========================================================================
+   左侧内容
+   用法: ::: left
+   ========================================================================== */
+
+.layout-left {
+  display: block !important;
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: left;
+}
+
+/* ==========================================================================
+   右侧内容
+   用法: ::: right
+   ========================================================================== */
+
+.layout-right {
+  display: block !important;
+  flex: 0 0 auto;
+  text-align: right;
+  white-space: nowrap;
+  color: var(--color-text-muted);
+}
+
+/* 右侧时间样式 */
+.layout-right p,
+.layout-right strong {
+  font-size: var(--resume-font-size-sm, 13px);
+  color: var(--color-text-muted);
+  font-weight: 500;
+  margin: 0;
+}
+
+/* 右侧列表样式 - 标记在文本右侧 */
+.layout-right ul,
+.layout-right ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  text-align: right;
+}
+
+.layout-right li {
+  padding-left: 0;
+  margin-bottom: 2px;
+}
+
+/* 无序列表：文本后添加圆点 */
+.layout-right ul li::after {
+  content: ' •';
+  color: var(--theme-color, #6b7280);
+  font-size: 0.8em;
+  margin-left: 0.3em;
+}
+
+/* 有序列表：文本后添加序号 */
+.layout-right ol {
+  counter-reset: right-list;
+}
+
+.layout-right ol li {
+  counter-increment: right-list;
+}
+
+.layout-right ol li::after {
+  content: ' ' counter(right-list);
+  color: var(--theme-color, #6b7280);
+  font-size: 0.85em;
+  font-weight: 600;
+  margin-left: 0.3em;
+}
+
+/* ==========================================================================
+   布局行内元素 margin 重置
+   只针对标题和段落，不影响 blockquote、ul、ol 等块级元素
+   ========================================================================== */
+
+.layout-row .layout-left > h1,
+.layout-row .layout-left > h2,
+.layout-row .layout-left > h3,
+.layout-row .layout-left > h4,
+.layout-row .layout-left > h5,
+.layout-row .layout-left > h6,
+.layout-row .layout-left > p,
+.layout-row .layout-right > h1,
+.layout-row .layout-right > h2,
+.layout-row .layout-right > h3,
+.layout-row .layout-right > h4,
+.layout-row .layout-right > h5,
+.layout-row .layout-right > h6,
+.layout-row .layout-right > p {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+/* ==========================================================================
+   居中布局
+   用法: ::: center
+   ========================================================================== */
+
+.layout-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+/* 强制居中对齐覆盖 justify */
+.layout-center > *,
+:is(.pagedjs_pages, .resume-content-wrapper) .layout-center p {
+  text-align: center;
+}
+
+/* 列表特殊处理：保持左对齐但块居中 */
+.layout-center ul {
+  text-align: left;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+}

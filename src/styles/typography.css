@@ -1,0 +1,330 @@
+/* ==========================================================================
+   MarkCV - 简历排版样式
+   包含标题、段落、列表、代码等元素的样式
+   使用 :is() 简化选择器
+   ========================================================================== */
+
+/* ==========================================================================
+   通用内容样式
+   ========================================================================== */
+
+:is(.pagedjs_pages, .resume-content-wrapper) {
+  color: var(--color-text-secondary);
+  line-height: var(--resume-line-height, 1.5);
+  font-size: var(--resume-font-size, 14px);
+  /* 中文排版优化 */
+  word-break: normal;
+  overflow-wrap: break-word;
+  line-break: strict;
+  /* 优化中文标点挤压 */
+  font-feature-settings: 'palt' 1;
+}
+
+/* ==========================================================================
+   Paged.js 预览布局
+   ========================================================================== */
+
+/* 多页垂直排列 */
+.pagedjs_pages {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 0;
+  gap: 24px;
+}
+
+/* 单页样式 - A4 尺寸带阴影 */
+.pagedjs_page {
+  background: white;
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.08),
+    0 1px 3px rgba(0, 0, 0, 0.05);
+  flex: none;
+  width: var(--pagedjs-width) !important;
+  height: var(--pagedjs-height) !important;
+  overflow: hidden;
+}
+
+/* 页面内容区域行高 */
+.pagedjs_area {
+  line-height: var(--resume-line-height, 1.5) !important;
+}
+
+/* ==========================================================================
+   标题层级系统 H1-H6
+   简历场景：H1=姓名, H2=版块, H3=公司/项目, H4=职位, H5/H6=备用
+   ========================================================================== */
+
+/* H1: 姓名 - 最大最醒目 */
+:is(.pagedjs_pages, .resume-content-wrapper) h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-top: 0;
+  margin-bottom: 4px;
+  line-height: 1.3;
+  display: block;
+  letter-spacing: 0.02em;
+}
+
+/* H2: 版块标题 - 带下边框分隔 */
+:is(.pagedjs_pages, .resume-content-wrapper) h2 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--theme-color, #111827);
+  border-bottom: 0.5px solid var(--theme-color, #111827);
+  padding-bottom: 4px;
+  margin-top: 20px;
+  margin-bottom: 12px;
+  letter-spacing: 0.05em;
+  display: block;
+  /* 防止标题后分页 */
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+/* H3: 公司名/项目名 - 稍加粗突出 */
+:is(.pagedjs_pages, .resume-content-wrapper) h3 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-top: 12px;
+  margin-bottom: 4px;
+  line-height: 1.4;
+  display: block;
+  /* 防止标题后分页 */
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+/* H4: 职位/子标题 - 次要信息 */
+:is(.pagedjs_pages, .resume-content-wrapper) h4 {
+  font-size: var(--resume-font-size-sm, 13px);
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+  margin-top: 1px;
+  margin-bottom: 4px;
+  line-height: 1.4;
+  display: block;
+}
+
+/* H5: 三级子标题 - 备用 */
+:is(.pagedjs_pages, .resume-content-wrapper) h5 {
+  font-size: var(--resume-font-size-sm, 13px);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  margin-top: 6px;
+  margin-bottom: 2px;
+  display: block;
+}
+
+/* H6: 四级子标题 - 备用 */
+:is(.pagedjs_pages, .resume-content-wrapper) h6 {
+  font-size: var(--resume-font-size-xs, 12px);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  margin-top: 4px;
+  margin-bottom: 2px;
+  display: block;
+}
+
+/* ==========================================================================
+   正文元素
+   ========================================================================== */
+
+/* 段落 - 中文两端对齐 */
+:is(.pagedjs_pages, .resume-content-wrapper) p {
+  margin-top: 0;
+  margin-bottom: 4px;
+  text-align: justify;
+  text-justify: inter-ideograph;
+  display: block;
+}
+
+/* 引用块 - 个人简介 */
+:is(.pagedjs_pages, .resume-content-wrapper) blockquote {
+  margin: 8px 0;
+  padding: 8px 12px;
+  border-left: 3px solid var(--theme-color, #111827);
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text-tertiary);
+  font-size: var(--resume-font-size-sm, 13px);
+}
+
+:is(.pagedjs_pages, .resume-content-wrapper) blockquote p {
+  margin: 0;
+}
+
+/* 加粗 - 深色强调 */
+:is(.pagedjs_pages, .resume-content-wrapper) strong {
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+/* 斜体 - 常用于时间、注释 */
+:is(.pagedjs_pages, .resume-content-wrapper) em {
+  font-style: normal;
+  color: var(--color-text-muted);
+  font-size: var(--resume-font-size-sm, 13px);
+}
+
+/* ==========================================================================
+   列表样式
+   ========================================================================== */
+
+/* 无序列表 */
+:is(.pagedjs_pages, .resume-content-wrapper) ul {
+  list-style-type: disc;
+  padding-left: 1.2em;
+  margin-top: 4px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+/* 有序列表 */
+:is(.pagedjs_pages, .resume-content-wrapper) ol {
+  list-style-type: decimal;
+  padding-left: 1.4em;
+  margin-top: 4px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+:is(.pagedjs_pages, .resume-content-wrapper) li {
+  line-height: var(--resume-line-height, 1.5);
+  margin-bottom: 3px;
+  padding-left: 2px;
+  display: list-item;
+}
+
+/* 嵌套列表间距调整 */
+:is(.pagedjs_pages, .resume-content-wrapper) li ul,
+:is(.pagedjs_pages, .resume-content-wrapper) li ol {
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+
+/* 列表标记 - 使用主题色 */
+:is(.pagedjs_pages, .resume-content-wrapper) ul li::marker {
+  color: var(--theme-color, #111827);
+  font-size: 0.7em;
+}
+
+:is(.pagedjs_pages, .resume-content-wrapper) ol li::marker {
+  color: var(--theme-color, #111827);
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   代码样式
+   ========================================================================== */
+
+/* 行内代码 - 技能标签 */
+:is(.pagedjs_pages, .resume-content-wrapper) code {
+  font-family: var(--font-mono);
+  background-color: var(--color-bg-tertiary);
+  color: var(--theme-color, #374151);
+  padding: 0.15em 0.4em;
+  border-radius: 3px;
+  font-size: 0.85em;
+  border: 1px solid var(--color-border);
+}
+
+/* 代码块 */
+:is(.pagedjs_pages, .resume-content-wrapper) pre {
+  background-color: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: 10px 12px;
+  margin: 8px 0;
+  overflow-x: auto;
+  font-size: var(--resume-font-size-sm, 13px);
+}
+
+:is(.pagedjs_pages, .resume-content-wrapper) pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+  color: var(--color-text-secondary);
+}
+
+/* ==========================================================================
+   链接与其他元素
+   ========================================================================== */
+
+/* 链接 - 使用主题色 */
+:is(.pagedjs_pages, .resume-content-wrapper) a {
+  color: var(--theme-color, #111827);
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+:is(.pagedjs_pages, .resume-content-wrapper) a:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* 水平分割线 */
+:is(.pagedjs_pages, .resume-content-wrapper) hr {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: 12px 0;
+}
+
+/* 图片 - 简历头像等 */
+:is(.pagedjs_pages, .resume-content-wrapper) img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+
+/* ==========================================================================
+   表格样式
+   ========================================================================== */
+
+:is(.pagedjs_pages, .resume-content-wrapper) table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 8px 0;
+  font-size: var(--resume-font-size-sm, 13px);
+}
+
+:is(.pagedjs_pages, .resume-content-wrapper) th {
+  background-color: var(--color-bg-tertiary);
+  font-weight: 600;
+  text-align: left;
+  padding: 6px 10px;
+  border: 1px solid var(--color-border);
+  color: var(--theme-color, #111827);
+}
+
+:is(.pagedjs_pages, .resume-content-wrapper) td {
+  padding: 6px 10px;
+  border: 1px solid var(--color-border);
+}
+
+/* ==========================================================================
+   文本修饰
+   ========================================================================== */
+
+/* 删除线 */
+:is(.pagedjs_pages, .resume-content-wrapper) del {
+  text-decoration: line-through;
+  color: #9ca3af;
+}
+
+/* 下划线 */
+:is(.pagedjs_pages, .resume-content-wrapper) u {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* 标记/高亮 */
+:is(.pagedjs_pages, .resume-content-wrapper) mark {
+  background-color: #fef08a;
+  padding: 0.1em 0.2em;
+  border-radius: 2px;
+}

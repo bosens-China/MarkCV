@@ -45,6 +45,7 @@ export function usePagedPreview(options: PagedPreviewOptions) {
 
   /**
    * 生成 Paged.js 动态样式
+   * 注意：只设置 CSS 变量和 @page 规则，其他样式在 style.css 中统一定义
    */
   const generatePagedStyles = (marginValue: string) => `
     /* Paged.js 动态配置 - 覆盖默认变量 */
@@ -71,106 +72,73 @@ export function usePagedPreview(options: PagedPreviewOptions) {
       size: A4; 
       margin: ${marginValue};
     }
-    
-    /* 预览区样式 */
-    .pagedjs_pages { 
-      display: flex; 
-      flex-direction: column; 
-      align-items: center; 
-      width: 100%; 
-      padding: 0;
-      gap: 24px;
-    }
-    
-    .pagedjs_page { 
-      background: white; 
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05);
-      flex: none;
-      width: var(--pagedjs-width) !important;
-      height: var(--pagedjs-height) !important;
-      overflow: hidden;
-    }
-    
-    .pagedjs_area { 
-      line-height: var(--resume-line-height, ${lineHeight.value}) !important;
-    }
-    
-    /* 布局样式强化 */
-    .layout-row {
-      display: flex !important;
-      flex-direction: row !important;
-      justify-content: space-between !important;
-      align-items: baseline !important;
-      width: 100% !important;
-      break-inside: avoid;
-      page-break-inside: avoid;
-    }
-    
-    .layout-left {
-      display: block !important;
-      flex: 1 1 auto !important;
-      text-align: left !important;
-    }
-    
-    .layout-right {
-      display: block !important;
-      flex: 0 0 auto !important;
-      text-align: right !important;
-    }
-    
-    /* 防止标题跨页断裂 */
-    h2, h3 {
-      break-after: avoid;
-      page-break-after: avoid;
-    }
   `;
 
   /**
    * 更新预览（带防抖）
    */
-  const updatePreview = useDebounceFn(async () => {
-    if (!previewTarget.value || !sourceContent.value) return;
+  const updatePreview = useDebounceFn(
+    async () => {
+      if (!previewTarget.value || !sourceContent.value) return;
 
-    isRendering.value = true;
-    
-    // 清理上一次 Paged.js 注入的样式
-    document.querySelectorAll('head > style[data-pagedjs-inserted-styles]').forEach(el => el.remove());
-    previewTarget.value.innerHTML = '';
-    pagedPreviewer = new Previewer();
-    
-    try {
-      const contentClone = sourceContent.value.cloneNode(true) as HTMLElement;
-      contentClone.style.display = 'block';
-      const styleFragment = document.createDocumentFragment();
-      const marginValue = `${pageMargin.value}mm`;
-      
-      // 1. 先复制现有样式表
-      document.querySelectorAll('style, link[rel="stylesheet"]').forEach(el => {
-        styleFragment.appendChild(el.cloneNode(true));
-      });
-      
-      // 2. 再注入动态样式
-      const pagedStyleEl = document.createElement('style');
-      pagedStyleEl.innerHTML = generatePagedStyles(marginValue);
-      styleFragment.appendChild(pagedStyleEl);
-      
-      contentClone.insertBefore(styleFragment, contentClone.firstChild);
+      isRendering.value = true;
 
-      await pagedPreviewer.preview(contentClone.innerHTML, [], previewTarget.value);
-    } catch (error) {
-      console.error('Paged.js rendering failed:', error);
-    } finally {
-      isRendering.value = false;
-    }
-  }, 300, { maxWait: 1500 });
+      // 清理上一次 Paged.js 注入的样式
+      document
+        .querySelectorAll('head > style[data-pagedjs-inserted-styles]')
+        .forEach((el) => el.remove());
+      previewTarget.value.innerHTML = '';
+      pagedPreviewer = new Previewer();
+
+      try {
+        const contentClone = sourceContent.value.cloneNode(true) as HTMLElement;
+        contentClone.style.display = 'block';
+        const styleFragment = document.createDocumentFragment();
+        const marginValue = `${pageMargin.value}mm`;
+
+        // 1. 先复制现有样式表
+        document
+          .querySelectorAll('style, link[rel="stylesheet"]')
+          .forEach((el) => {
+            styleFragment.appendChild(el.cloneNode(true));
+          });
+
+        // 2. 再注入动态样式
+        const pagedStyleEl = document.createElement('style');
+        pagedStyleEl.innerHTML = generatePagedStyles(marginValue);
+        styleFragment.appendChild(pagedStyleEl);
+
+        contentClone.insertBefore(styleFragment, contentClone.firstChild);
+
+        await pagedPreviewer.preview(
+          contentClone.innerHTML,
+          [],
+          previewTarget.value,
+        );
+      } catch (error) {
+        console.error('Paged.js rendering failed:', error);
+      } finally {
+        isRendering.value = false;
+      }
+    },
+    300,
+    { maxWait: 1500 },
+  );
 
   /**
    * 监听依赖变化自动更新预览
    */
   watch(
-    [renderedContent, themeColor, pageMargin, lineHeight, currentFont, customCss],
+    [
+      renderedContent,
+      themeColor,
+      pageMargin,
+      lineHeight,
+      currentFont,
+      customCss,
+    ],
     () => updatePreview(),
-    { immediate: false }
+    { immediate: false },
   );
 
   /**
@@ -181,9 +149,9 @@ export function usePagedPreview(options: PagedPreviewOptions) {
       alert('正在进行排版计算，请稍后...');
       return;
     }
-    
+
     await nextTick();
-    
+
     // 移除可能的空白页
     const pages = previewTarget.value?.querySelectorAll('.pagedjs_page');
     if (pages && pages.length > 0) {
@@ -194,7 +162,7 @@ export function usePagedPreview(options: PagedPreviewOptions) {
         }
       });
     }
-    
+
     window.print();
   };
 

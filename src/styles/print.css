@@ -1,0 +1,212 @@
+/* ==========================================================================
+   MarkCV - 打印样式
+   修复多余空白页问题，优化打印输出
+   ========================================================================== */
+
+@media print {
+  /* ========================================================================
+     页面基础设置
+     ======================================================================== */
+
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
+  /* 重置基础元素 */
+  html,
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    /* 关键：移除最小高度限制，避免产生空白页 */
+    min-height: 0 !important;
+  }
+
+  /* ========================================================================
+     隐藏 UI 元素
+     ======================================================================== */
+
+  /* 通用不打印类 */
+  .no-print,
+  header,
+  .splitpanes__splitter,
+  .custom-splitter {
+    display: none !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* 编辑器相关元素 */
+  [class*='codemirror'],
+  [class*='cm-'] {
+    display: none !important;
+  }
+
+  /* Naive UI 组件 */
+  .n-button,
+  .n-input,
+  .n-select,
+  .n-tooltip {
+    display: none !important;
+  }
+
+  /* ========================================================================
+     Splitpanes 布局调整
+     ======================================================================== */
+
+  /* 容器可见但重置布局 */
+  .splitpanes {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* 内部 pane 容器 */
+  .splitpanes__pane {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    position: static !important;
+  }
+
+  /* 隐藏编辑器 pane（第一个），只保留预览 pane */
+  .splitpanes__pane:first-child {
+    display: none !important;
+  }
+
+  /* 隐藏源内容（已克隆到 pagedjs 中） */
+  [style*='display: none'] {
+    display: none !important;
+  }
+
+  /* ========================================================================
+     容器重置
+     ======================================================================== */
+
+  /* 主容器 */
+  .h-screen {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    display: block !important;
+    background: white !important;
+  }
+
+  .flex-1 {
+    display: block !important;
+    overflow: visible !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  /* 预览面板 */
+  .preview-pane {
+    width: 100% !important;
+    max-width: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: white !important;
+    overflow: visible !important;
+    position: static !important;
+    height: auto !important;
+    min-height: 0 !important;
+    flex-shrink: unset !important;
+  }
+
+  .preview-pane > .flex.justify-center {
+    padding: 0 !important;
+    margin: 0 !important;
+    min-height: 0 !important;
+  }
+
+  /* ========================================================================
+     Paged.js 打印适配
+     ======================================================================== */
+
+  .pagedjs-render-container {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .pagedjs_pages {
+    width: 100% !important;
+    display: block !important;
+    transform: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    /* 移除 flex 布局避免空白 */
+    flex-direction: unset !important;
+    align-items: unset !important;
+    gap: 0 !important;
+  }
+
+  .pagedjs_page {
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    width: var(--pagedjs-width, 210mm) !important;
+    height: var(--pagedjs-height, 297mm) !important;
+    min-height: 0 !important;
+    max-height: var(--pagedjs-height, 297mm) !important;
+    overflow: hidden !important;
+    /* 分页控制 */
+    page-break-after: always;
+    break-after: page;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* 最后一页不需要分页符 - 避免产生空白页 */
+  .pagedjs_page:last-child {
+    page-break-after: auto;
+    break-after: auto;
+  }
+
+  /* 页面内容区域 */
+  .pagedjs_area {
+    height: 100% !important;
+    width: 100% !important;
+  }
+
+  .pagedjs_page_content {
+    height: 100% !important;
+  }
+
+  /* 隐藏 Paged.js 生成的边距元素 */
+  .pagedjs_margin-content,
+  .pagedjs_margin-top,
+  .pagedjs_margin-bottom,
+  .pagedjs_margin-left,
+  .pagedjs_margin-right {
+    display: none !important;
+  }
+
+  /* ========================================================================
+     内容打印优化
+     ======================================================================== */
+
+  /* 防止内容溢出导致空白页 */
+  .resume-content-wrapper {
+    overflow: visible !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  /* 布局行防止跨页断裂 */
+  .layout-row {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

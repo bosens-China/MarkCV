@@ -1,4 +1,8 @@
-import { createRouter, createWebHashHistory, createWebHistory } from 'vue-router';
+import {
+  createRouter,
+  createWebHashHistory,
+  createWebHistory,
+} from 'vue-router';
 import Dashboard from '../views/Dashboard.vue';
 import Editor from '../views/Editor.vue';
 
@@ -12,6 +16,10 @@ const routes = [
     path: '/editor/:id',
     name: 'Editor',
     component: Editor,
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    redirect: '/',
   },
 ];
 

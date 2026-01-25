@@ -66,7 +66,9 @@ export interface ResumeSettings {
  * useResumeSettings Composable
  * @param initialSettings - 初始设置值
  */
-export function useResumeSettings(initialSettings?: Partial<typeof DEFAULT_SETTINGS>): ResumeSettings {
+export function useResumeSettings(
+  initialSettings?: Partial<typeof DEFAULT_SETTINGS>,
+): ResumeSettings {
   const settings = { ...DEFAULT_SETTINGS, ...initialSettings };
 
   return {
@@ -89,11 +91,13 @@ export function loadSettingsFromResume(
     pageMargin?: number;
     lineHeight?: number;
     customCss?: string;
-  }
+  },
 ) {
   if (resume.themeColor) settings.themeColor.value = resume.themeColor;
-  if (resume.pageMargin !== undefined) settings.pageMargin.value = resume.pageMargin;
-  if (resume.lineHeight !== undefined) settings.lineHeight.value = resume.lineHeight;
+  if (resume.pageMargin !== undefined)
+    settings.pageMargin.value = resume.pageMargin;
+  if (resume.lineHeight !== undefined)
+    settings.lineHeight.value = resume.lineHeight;
   if (resume.customCss) settings.customCss.value = resume.customCss;
 }
 

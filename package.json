@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
+    "format": "prettier --write src",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -16,6 +17,7 @@
     "@fontsource/noto-serif-sc": "^5.2.9",
     "@vueuse/core": "^14.1.0",
     "gsap": "^3.14.2",
+    "localforage": "^1.10.0",
     "markdown-it": "^14.1.0",
     "markdown-it-container": "^4.0.0",
     "naive-ui": "^2.43.2",

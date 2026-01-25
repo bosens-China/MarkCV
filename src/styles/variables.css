@@ -1,0 +1,78 @@
+/* ==========================================================================
+   MarkCV - CSS 变量定义
+   包含 Paged.js 变量、主题色、排版参数
+   ========================================================================== */
+
+:root {
+  /* ========================================================================
+     字体定义 - 中文场景优化
+     ======================================================================== */
+  --font-sans: 'Noto Sans SC', 'Source Han Sans SC', 'PingFang SC',
+    'Microsoft YaHei', system-ui, -apple-system, sans-serif;
+  --font-serif: 'Noto Serif SC', 'Source Han Serif SC', 'STSong', Georgia,
+    serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco,
+    Consolas, monospace;
+
+  /* ========================================================================
+     Paged.js 官方 CSS 变量 - A4 纸张 (210mm x 297mm)
+     这些变量会被 Paged.js 自动读取，用于控制页面尺寸和边距
+     ======================================================================== */
+
+  /* 页面尺寸 - A4 */
+  --pagedjs-width: 210mm;
+  --pagedjs-height: 297mm;
+  --pagedjs-pagebox-width: 210mm;
+  --pagedjs-pagebox-height: 297mm;
+
+  /* 页面边距 - 中文简历推荐 15-20mm */
+  --pagedjs-margin-top: 20mm;
+  --pagedjs-margin-right: 20mm;
+  --pagedjs-margin-bottom: 20mm;
+  --pagedjs-margin-left: 20mm;
+
+  /* ========================================================================
+     应用自定义变量 - 主题色与排版
+     ======================================================================== */
+
+  /* 主题色 - 默认经典黑 */
+  --theme-color: #111827;
+
+  /* 页面边距快捷变量（会被 JS 动态覆盖） */
+  --page-margin: 20mm;
+
+  /* 中文排版推荐行高 */
+  --resume-line-height: 1.5;
+
+  /* 中文排版推荐字号 */
+  --resume-font-size: 14px;
+  --resume-font-size-sm: 13px;
+  --resume-font-size-xs: 12px;
+
+  /* ========================================================================
+     颜色系统
+     ======================================================================== */
+
+  /* 文本颜色 */
+  --color-text-primary: #111827; /* gray-900 */
+  --color-text-secondary: #374151; /* gray-700 */
+  --color-text-tertiary: #4b5563; /* gray-600 */
+  --color-text-muted: #6b7280; /* gray-500 */
+
+  /* 边框颜色 */
+  --color-border: #e5e7eb; /* gray-200 */
+  --color-border-light: #f3f4f6; /* gray-100 */
+
+  /* 背景颜色 */
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f9fafb; /* gray-50 */
+  --color-bg-tertiary: #f8f9fa;
+
+  /* ========================================================================
+     字体渲染优化
+     ======================================================================== */
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

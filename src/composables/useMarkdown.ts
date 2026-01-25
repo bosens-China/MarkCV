@@ -8,32 +8,32 @@ import Container from 'markdown-it-container';
 
 /**
  * 自定义容器配置
- * 支持的容器: row, cols-3, left, right, center, text-center
+ * 支持的容器: row, left, right, center
  */
-const CONTAINER_NAMES = ['row', 'cols-3', 'left', 'right', 'center', 'text-center'] as const;
+const CONTAINER_NAMES = ['row', 'left', 'right', 'center'] as const;
 
 /**
  * 创建 Markdown 解析器实例
  */
 function createMarkdownParser(): MarkdownIt {
   const md = new MarkdownIt({
-    html: true,        // 允许 HTML 标签
-    linkify: false,    // 禁止自动将 URL 转换为链接
+    html: true, // 允许 HTML 标签
+    linkify: false, // 禁止自动将 URL 转换为链接
     typographer: true, // 启用智能引号等排版优化
-    breaks: true,      // 将换行符转换为 <br>
+    breaks: true, // 将换行符转换为 <br>
   });
 
   // 注册 row 容器（使用 4 个冒号 :::: 支持嵌套）
   md.use(Container, 'row', {
     render: (tokens: any, idx: number) =>
-      tokens[idx].nesting === 1 ? '<div class="layout-row">' : '</div>'
+      tokens[idx].nesting === 1 ? '<div class="layout-row">' : '</div>',
   });
 
   // 注册其他容器（使用 3 个冒号 :::）
-  CONTAINER_NAMES.filter(name => name !== 'row').forEach(name => {
+  CONTAINER_NAMES.filter((name) => name !== 'row').forEach((name) => {
     md.use(Container, name, {
       render: (tokens: any, idx: number) =>
-        tokens[idx].nesting === 1 ? `<div class="layout-${name}">` : '</div>'
+        tokens[idx].nesting === 1 ? `<div class="layout-${name}">` : '</div>',
     });
   });
 
@@ -59,7 +59,7 @@ export function useMarkdown(content: Ref<string>) {
 
 /**
  * 支持的 Markdown 语法参考
- * 
+ *
  * 基础语法:
  * - # H1 ~ ###### H6  标题
  * - **bold**          粗体
@@ -73,9 +73,9 @@ export function useMarkdown(content: Ref<string>) {
  * - > quote           引用块
  * - ---               水平线
  * - | table |         表格
- * 
+ *
  * 自定义容器语法（用于简历布局）:
- * 
+ *
  * :::: row
  * ::: left
  * 左侧内容
@@ -84,7 +84,7 @@ export function useMarkdown(content: Ref<string>) {
  * 右侧内容
  * :::
  * ::::
- * 
+ *
  * ::: center
  * 居中内容
  * :::

@@ -1,5 +1,9 @@
 <template>
-  <n-config-provider :locale="zhCN" :date-locale="dateZhCN" :theme-overrides="themeOverrides">
+  <n-config-provider
+    :locale="zhCN"
+    :date-locale="dateZhCN"
+    :theme-overrides="themeOverrides"
+  >
     <n-message-provider>
       <n-dialog-provider>
         <router-view></router-view>
@@ -12,6 +16,14 @@
 import { NConfigProvider, NMessageProvider, NDialogProvider } from 'naive-ui';
 import { zhCN, dateZhCN } from 'naive-ui';
 import type { GlobalThemeOverrides } from 'naive-ui';
+import { onMounted } from 'vue';
+import { useResumeStore } from './stores/resume';
+
+const resumeStore = useResumeStore();
+
+onMounted(() => {
+  resumeStore.init();
+});
 
 /**
  * 自定义主题配置
@@ -34,6 +46,6 @@ const themeOverrides: GlobalThemeOverrides = {
   },
   Input: {
     borderRadius: '8px',
-  }
+  },
 };
 </script>
