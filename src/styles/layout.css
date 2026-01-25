@@ -55,43 +55,38 @@
   margin: 0;
 }
 
-/* 右侧列表样式 - 标记在文本右侧 */
+/* 布局区域内的列表样式 - 统一紧凑间距 */
+.layout-left ul,
+.layout-left ol,
 .layout-right ul,
 .layout-right ol {
-  list-style: none;
-  padding: 0;
+  list-style-position: inside;
+  padding-left: 0;
   margin: 0;
-  text-align: right;
 }
 
+.layout-left li,
 .layout-right li {
   padding-left: 0;
   margin-bottom: 2px;
 }
 
-/* 无序列表：文本后添加圆点 */
-.layout-right ul li::after {
-  content: ' •';
+.layout-left ul li::marker,
+.layout-right ul li::marker {
   color: var(--theme-color, #6b7280);
-  font-size: 0.8em;
-  margin-left: 0.3em;
+  font-size: 0.7em;
 }
 
-/* 有序列表：文本后添加序号 */
-.layout-right ol {
-  counter-reset: right-list;
-}
-
-.layout-right ol li {
-  counter-increment: right-list;
-}
-
-.layout-right ol li::after {
-  content: ' ' counter(right-list);
+.layout-left ol li::marker,
+.layout-right ol li::marker {
   color: var(--theme-color, #6b7280);
-  font-size: 0.85em;
   font-weight: 600;
-  margin-left: 0.3em;
+}
+
+/* 右侧特有：文本右对齐 */
+.layout-right ul,
+.layout-right ol {
+  text-align: right;
 }
 
 /* ==========================================================================
