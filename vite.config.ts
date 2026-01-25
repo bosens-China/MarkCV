@@ -5,13 +5,16 @@ import Components from 'unplugin-vue-components/vite';
 import { NaiveUiResolver } from 'unplugin-vue-components/resolvers';
 
 // https://vite.dev/config/
-export default defineConfig({
-  plugins: [
-    vue(),
-    UnoCSS(),
+export default defineConfig(({ command }) => {
+  return {
+    base: command === 'serve' ? '/' : '/MarkCV/',
+    plugins: [
+      vue(),
+      UnoCSS(),
 
-    Components({
-      resolvers: [NaiveUiResolver()],
-    }),
-  ],
+      Components({
+        resolvers: [NaiveUiResolver()],
+      }),
+    ],
+  };
 });

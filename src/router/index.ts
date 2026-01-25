@@ -1,4 +1,8 @@
-import { createRouter, createWebHistory } from 'vue-router';
+import {
+  createRouter,
+  createWebHashHistory,
+  createWebHistory,
+} from 'vue-router';
 import Dashboard from '../views/Dashboard.vue';
 import Editor from '../views/Editor.vue';
 
@@ -16,7 +20,7 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: import.meta.env.DEV ? createWebHashHistory() : createWebHistory(),
   routes,
 });
 
