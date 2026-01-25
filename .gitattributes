@@ -1,0 +1,16 @@
+# 源码统一 LF
+*.js   text eol=lf
+*.ts   text eol=lf
+*.vue  text eol=lf
+*.json text eol=lf
+*.html text eol=lf
+*.css  text eol=lf
+*.scss text eol=lf
+*.md   text eol=lf
+*.yml  text eol=lf
+
+# shell 脚本必须 LF（否则在 Linux 会炸）
+*.sh   text eol=lf
+
+# Windows 脚本
+*.bat  text eol=crlf

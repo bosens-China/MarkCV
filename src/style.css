@@ -1,0 +1,718 @@
+/* -------------------------------------------------------------------------- */
+/*  MarkCV - 中文场景优化的简历编辑器                                          */
+/*  基于 Paged.js 的 CSS 变量体系                                              */
+/* -------------------------------------------------------------------------- */
+
+:root {
+  /* 基础字体 - 中文场景优化 */
+  font-family: "Noto Sans SC", "Source Han Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* ======================================================================== */
+  /* Paged.js 官方 CSS 变量 - A4 纸张 (210mm x 297mm)                          */
+  /* 这些变量会被 Paged.js 自动读取，用于控制页面尺寸和边距                     */
+  /* ======================================================================== */
+  
+  /* 页面尺寸 - A4 */
+  --pagedjs-width: 210mm;
+  --pagedjs-height: 297mm;
+  --pagedjs-width-right: 210mm;
+  --pagedjs-height-right: 297mm;
+  --pagedjs-width-left: 210mm;
+  --pagedjs-height-left: 297mm;
+  --pagedjs-pagebox-width: 210mm;
+  --pagedjs-pagebox-height: 297mm;
+  
+  /* 页面边距 - 中文简历推荐 15-20mm */
+  --pagedjs-margin-top: 20mm;
+  --pagedjs-margin-right: 20mm;
+  --pagedjs-margin-bottom: 20mm;
+  --pagedjs-margin-left: 20mm;
+  
+  /* 页面内边距 */
+  --pagedjs-padding-top: 0mm;
+  --pagedjs-padding-right: 0mm;
+  --pagedjs-padding-bottom: 0mm;
+  --pagedjs-padding-left: 0mm;
+  
+  /* 脚注高度 */
+  --pagedjs-footnotes-height: 0mm;
+  
+  /* 裁切标记（简历打印通常不需要） */
+  --pagedjs-bleed-top: 0mm;
+  --pagedjs-bleed-right: 0mm;
+  --pagedjs-bleed-bottom: 0mm;
+  --pagedjs-bleed-left: 0mm;
+  --pagedjs-crop-color: black;
+  --pagedjs-crop-shadow: white;
+  --pagedjs-mark-cross-display: none;
+  --pagedjs-mark-crop-display: none;
+
+  /* ======================================================================== */
+  /* 应用自定义变量 - 主题色与排版                                             */
+  /* ======================================================================== */
+  
+  /* 主题色 - 默认经典黑 */
+  --theme-color: #111827;
+  
+  /* 页面边距快捷变量（会被 JS 动态覆盖） */
+  --page-margin: 20mm;
+  
+  /* 中文排版推荐行高 */
+  --resume-line-height: 1.5;
+  
+  /* 中文排版推荐字号 */
+  --resume-font-size: 14px;
+  --resume-font-size-sm: 13px;
+  --resume-font-size-xs: 12px;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: #f9fafb;
+}
+
+/* 现代滚动条样式 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 99px;
+  border: 1px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #9ca3af;
+}
+
+/* -------------------------------------------------------------------------- */
+/*  简历预览与打印核心样式                                                     */
+/*  使用 Paged.js CSS 变量体系，优化中文排版                                   */
+/* -------------------------------------------------------------------------- */
+
+/* 字体切换支持 */
+.font-sans, .resume-content-wrapper.font-sans {
+  font-family: "Noto Sans SC", "Source Han Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, sans-serif !important;
+}
+.font-serif, .resume-content-wrapper.font-serif {
+  font-family: "Noto Serif SC", "Source Han Serif SC", "STSong", Georgia, serif !important;
+}
+
+/* 通用内容样式 - 使用 CSS 变量 */
+.pagedjs_pages,
+.resume-content-wrapper {
+  color: #374151;
+  line-height: var(--resume-line-height, 1.5);
+  font-size: var(--resume-font-size, 14px);
+  /* 中文排版优化 */
+  word-break: break-all;
+  overflow-wrap: break-word;
+  /* 优化中文标点挤压 */
+  font-feature-settings: "palt" 1;
+}
+
+/* ======================================================================== */
+/* 标题层级系统 H1-H6                                                        */
+/* 简历场景：H1=姓名, H2=版块, H3=公司/项目, H4=职位, H5/H6=备用              */
+/* ======================================================================== */
+
+/* H1: 姓名 - 最大最醒目 */
+.pagedjs_pages h1,
+.resume-content-wrapper h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+  margin-top: 0;
+  margin-bottom: 4px;
+  line-height: 1.3;
+  display: block;
+  letter-spacing: 0.02em;
+}
+
+/* H2: 版块标题 - 带下边框分隔 */
+.pagedjs_pages h2,
+.resume-content-wrapper h2 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--theme-color, #111827);
+  border-bottom: 0.5px solid var(--theme-color, #111827);
+  padding-bottom: 4px;
+  margin-top: 20px;
+  margin-bottom: 12px;
+  letter-spacing: 0.05em;
+  display: block;
+}
+
+/* H3: 公司名/项目名 - 稍加粗突出 */
+.pagedjs_pages h3,
+.resume-content-wrapper h3 {
+  font-size: 15px; /* 调整为 15px，与正文加粗 (14px) 拉开区分度 */
+  font-weight: 700;
+  color: #111827; 
+  margin-top: 12px;
+  margin-bottom: 4px;
+  line-height: 1.4;
+  display: block;
+}
+
+/* H4: 职位/子标题 - 次要信息 */
+.pagedjs_pages h4,
+.resume-content-wrapper h4 {
+  font-size: var(--resume-font-size-sm, 13px);
+  font-weight: 600;
+  color: #4b5563;
+  margin-top: 1px;
+  margin-bottom: 4px;
+  line-height: 1.4;
+  display: block;
+}
+
+/* H5: 三级子标题 - 备用 */
+.pagedjs_pages h5,
+.resume-content-wrapper h5 {
+  font-size: var(--resume-font-size-sm, 13px);
+  font-weight: 600;
+  color: #6b7280;
+  margin-top: 6px;
+  margin-bottom: 2px;
+  display: block;
+}
+
+/* H6: 四级子标题 - 备用 */
+.pagedjs_pages h6,
+.resume-content-wrapper h6 {
+  font-size: var(--resume-font-size-xs, 12px);
+  font-weight: 600;
+  color: #6b7280;
+  margin-top: 4px;
+  margin-bottom: 2px;
+  display: block;
+}
+
+/* 正文段落 - 中文两端对齐效果更好 */
+.pagedjs_pages p,
+.resume-content-wrapper p {
+  margin-top: 0;
+  margin-bottom: 4px;
+  text-align: justify;
+  text-justify: inter-ideograph;
+  display: block;
+}
+
+/* 引用块 - 个人简介 */
+.pagedjs_pages blockquote,
+.resume-content-wrapper blockquote {
+  margin: 8px 0;
+  padding: 8px 12px;
+  border-left: 3px solid var(--theme-color, #111827);
+  background-color: #f9fafb;
+  color: #4b5563;
+  font-size: var(--resume-font-size-sm, 13px);
+}
+
+.pagedjs_pages blockquote p,
+.resume-content-wrapper blockquote p {
+  margin: 0;
+}
+
+/* 加粗 - 使用深色强调，不随主题色变化（保持可读性） */
+.pagedjs_pages strong,
+.resume-content-wrapper strong {
+  font-weight: 700;
+  color: #111827;
+}
+
+/* 斜体 - 常用于时间、注释 */
+.pagedjs_pages em,
+.resume-content-wrapper em {
+  font-style: normal;
+  color: #6b7280;
+  font-size: var(--resume-font-size-sm, 13px);
+}
+
+/* 列表 - 中文场景下的列表样式 */
+.pagedjs_pages ul,
+.resume-content-wrapper ul {
+  list-style-type: disc;
+  padding-left: 1.2em;
+  margin-top: 4px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+/* 有序列表 */
+.pagedjs_pages ol,
+.resume-content-wrapper ol {
+  list-style-type: decimal;
+  padding-left: 1.4em;
+  margin-top: 4px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.pagedjs_pages li,
+.resume-content-wrapper li {
+  line-height: var(--resume-line-height, 1.5);
+  margin-bottom: 3px;
+  padding-left: 2px;
+  display: list-item;
+}
+
+/* 嵌套列表间距调整 */
+.pagedjs_pages li ul,
+.pagedjs_pages li ol,
+.resume-content-wrapper li ul,
+.resume-content-wrapper li ol {
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+
+/* 列表标记 - 使用主题色 */
+.pagedjs_pages ul li::marker,
+.resume-content-wrapper ul li::marker {
+  color: var(--theme-color, #111827);
+  font-size: 0.7em;
+}
+
+.pagedjs_pages ol li::marker,
+.resume-content-wrapper ol li::marker {
+  color: var(--theme-color, #111827);
+  font-weight: 600;
+}
+
+/* 行内代码 - 技能标签，边框使用主题色淡化版 */
+.pagedjs_pages code,
+.resume-content-wrapper code {
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  background-color: #f8f9fa;
+  color: var(--theme-color, #374151);
+  padding: 0.15em 0.4em;
+  border-radius: 3px;
+  font-size: 0.85em;
+  border: 1px solid #e5e7eb;
+}
+
+/* 链接 - 使用主题色，无下划线（更简洁大气） */
+.pagedjs_pages a,
+.resume-content-wrapper a {
+  color: var(--theme-color, #111827);
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.pagedjs_pages a:hover,
+.resume-content-wrapper a:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* 水平分割线 */
+.pagedjs_pages hr,
+.resume-content-wrapper hr {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 12px 0;
+}
+
+/* 代码块 */
+.pagedjs_pages pre,
+.resume-content-wrapper pre {
+  background-color: #f8f9fa;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  padding: 10px 12px;
+  margin: 8px 0;
+  overflow-x: auto;
+  font-size: var(--resume-font-size-sm, 13px);
+}
+
+.pagedjs_pages pre code,
+.resume-content-wrapper pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+  color: #374151;
+}
+
+/* 图片 - 简历头像等 */
+.pagedjs_pages img,
+.resume-content-wrapper img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+
+/* 表格 */
+.pagedjs_pages table,
+.resume-content-wrapper table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 8px 0;
+  font-size: var(--resume-font-size-sm, 13px);
+}
+
+.pagedjs_pages th,
+.resume-content-wrapper th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  text-align: left;
+  padding: 6px 10px;
+  border: 1px solid #e5e7eb;
+  color: var(--theme-color, #111827);
+}
+
+.pagedjs_pages td,
+.resume-content-wrapper td {
+  padding: 6px 10px;
+  border: 1px solid #e5e7eb;
+}
+
+/* 删除线 */
+.pagedjs_pages del,
+.resume-content-wrapper del {
+  text-decoration: line-through;
+  color: #9ca3af;
+}
+
+/* 下划线（使用 HTML <u> 或自定义语法） */
+.pagedjs_pages u,
+.resume-content-wrapper u {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* 标记/高亮 */
+.pagedjs_pages mark,
+.resume-content-wrapper mark {
+  background-color: #fef08a;
+  padding: 0.1em 0.2em;
+  border-radius: 2px;
+}
+
+/* ======================================================================== */
+/* 布局辅助类 - 自定义容器语法                                               */
+/* ======================================================================== */
+
+/* 行布局容器 - 用于左右分布排列 */
+.layout-row {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: space-between !important;
+  align-items: baseline !important;
+  gap: 16px;
+  width: 100%;
+  margin-bottom: 2px;
+  /* 防止跨页断开 */
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+/* 三栏布局容器 */
+.layout-cols-3 {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: space-between !important;
+  align-items: flex-start !important;
+  gap: 16px;
+  width: 100%;
+  margin-bottom: 8px;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.layout-cols-3 > div {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 左侧内容 - 自适应宽度，左对齐 */
+.layout-left {
+  display: block !important;
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: left;
+}
+
+/* 右侧内容 - 自适应宽度，右对齐 */
+.layout-right {
+  display: block !important;
+  flex: 0 0 auto;
+  text-align: right;
+  white-space: nowrap;
+  color: #6b7280;
+}
+
+/* 行内元素重置 margin */
+.layout-row .layout-left > *,
+.layout-row .layout-right > * {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+/* 右侧时间样式 */
+.layout-right p,
+.layout-right strong {
+  font-size: var(--resume-font-size-sm, 13px);
+  color: #6b7280;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* 居中布局 */
+.layout-center, .layout-text-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+/* 修复：强制居中对齐覆盖 justify */
+.layout-center > *, .layout-text-center > *,
+.pagedjs_pages .layout-center p, .pagedjs_pages .layout-text-center p,
+.resume-content-wrapper .layout-center p, .resume-content-wrapper .layout-text-center p {
+  text-align: center;
+}
+
+/* 列表特殊处理：保持左对齐但块居中 */
+.layout-center ul {
+  text-align: left;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.layout-text-center ul {
+  text-align: center;
+  list-style-position: inside;
+  padding-left: 0;
+}
+
+
+/* ======================================================================== */
+/* 打印样式 - 修复多余空白页问题                                              */
+/* ======================================================================== */
+
+@media print {
+  /* 使用 Paged.js 变量设置页面尺寸 */
+  @page {
+    size: A4;
+    margin: 0;
+  }
+  
+  /* 重置基础元素 */
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    /* 关键：移除最小高度限制，避免产生空白页 */
+    min-height: 0 !important;
+  }
+
+  /* 隐藏所有 UI 元素 - 更精确的选择器 */
+  .no-print,
+  header,
+  .splitpanes,
+  .splitpanes__splitter,
+  .custom-splitter,
+  [class*="codemirror"],
+  [class*="cm-"],
+  .n-button,
+  .n-input,
+  .n-select,
+  .n-tooltip,
+  .n-config-provider > .n-message-provider > .n-dialog-provider > style { 
+    display: none !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* 隐藏编辑器容器 */
+  .flex-1.flex.flex-col.min-w-0.bg-white {
+    display: none !important;
+  }
+
+  /* 隐藏源内容（已克隆到 pagedjs 中） */
+  [style*="display: none"] {
+    display: none !important;
+  }
+
+  /* 主容器重置 - 关键修复 */
+  .h-screen {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    display: block !important;
+    background: white !important;
+  }
+
+  .flex-1 {
+    display: block !important;
+    overflow: visible !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  /* 预览面板 - 关键修复 */
+  .preview-pane {
+    width: 100% !important;
+    max-width: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: white !important;
+    overflow: visible !important;
+    position: static !important;
+    height: auto !important;
+    min-height: 0 !important;
+    flex-shrink: unset !important;
+  }
+
+  /* 隐藏预览区的内边距容器 */
+  .preview-pane > .flex.justify-center {
+    padding: 0 !important;
+    margin: 0 !important;
+    min-height: 0 !important;
+  }
+
+  /* ======================================================================== */
+  /* Paged.js 打印适配 - 核心修复                                              */
+  /* ======================================================================== */
+  
+  .pagedjs-render-container {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .pagedjs_pages {
+    width: 100% !important;
+    display: block !important;
+    transform: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    /* 关键：移除 flex 布局避免空白 */
+    flex-direction: unset !important;
+    align-items: unset !important;
+    gap: 0 !important;
+  }
+  
+  .pagedjs_page {
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    width: var(--pagedjs-width, 210mm) !important;
+    height: var(--pagedjs-height, 297mm) !important;
+    min-height: 0 !important;
+    max-height: var(--pagedjs-height, 297mm) !important;
+    overflow: hidden !important;
+    /* 分页控制 */
+    page-break-after: always;
+    break-after: page;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* 最后一页不需要分页符 - 避免产生空白页 */
+  .pagedjs_page:last-child {
+    page-break-after: auto;
+    break-after: auto;
+  }
+
+  /* 确保页面内容区域正确 */
+  .pagedjs_area {
+    height: 100% !important;
+    width: 100% !important;
+  }
+
+  .pagedjs_page_content {
+    height: 100% !important;
+  }
+
+  /* 隐藏 Paged.js 生成的额外元素 */
+  .pagedjs_margin-content,
+  .pagedjs_margin-top,
+  .pagedjs_margin-bottom,
+  .pagedjs_margin-left,
+  .pagedjs_margin-right {
+    display: none !important;
+  }
+
+  /* 防止内容溢出导致空白页 */
+  .resume-content-wrapper {
+    overflow: visible !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  /* 布局行防止跨页断裂 */
+  .layout-row {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* 链接打印时保留下划线 */
+  /* a {
+    text-decoration: underline !important;
+    text-decoration-color: currentColor !important;
+  } */
+}
+
+/* ======================================================================== */
+/* Paged.js 预览布局样式                                                 */
+/* ======================================================================== */
+
+.pagedjs_pages {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 0;
+  gap: 24px;
+}
+
+.pagedjs_page {
+  background: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05);
+  flex: none;
+  width: var(--pagedjs-width) !important;
+  height: var(--pagedjs-height) !important;
+  overflow: hidden;
+}
+
+.pagedjs_area {
+  line-height: var(--resume-line-height, 1.5) !important;
+}
+
+/* 防止标题后分页 */
+.pagedjs_pages h2,
+.pagedjs_pages h3 {
+  break-after: avoid;
+  page-break-after: avoid;
+}
