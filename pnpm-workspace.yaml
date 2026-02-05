@@ -3,3 +3,5 @@ onlyBuiltDependencies:
   - core-js
   - es5-ext
   - esbuild
+packages:
+  - 'apps/*'
