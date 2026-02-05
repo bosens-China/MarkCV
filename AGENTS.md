@@ -1,38 +1,53 @@
 # AGENTS.md
 
-## 项目上下文
+## 项目说明
 
-这是一个基于 Vue 3 + Vite 的在线 Markdown 简历制作平台。核心痛点是解决标准 Markdown 无法进行左右分栏排版的问题。我们通过自定义容器语法（Custom Containers）实现了类似 Grid/Flex 的布局能力。
+这是一个 **前后端分离** 的在线 Markdown 简历制作平台。
 
-## 启动与开发
+- **Frontend**：Vue 3 + Vite，用于 Markdown 编辑与渲染
+- **Backend**：API 服务，负责用户体系与简历数据持久化（PostgreSQL）
 
-- **安装依赖**: 使用 `pnpm install` (强制使用 pnpm)。
-- **启动开发环境**: `pnpm dev`。
-- **构建生产包**: `pnpm build`。
-- **运行测试**: `pnpm test` (使用 Vitest)。
-- **hooks 库**：`vueuse`
+## 通用要求
 
-## 代码规范与技术栈
+1. 代码注释在必要时添加，保持代码可读性。
+2. 代码注释和回复使用中文。
 
-- **核心框架**: Vue 3 (Composition API, `<script setup>`)。
-- **构建工具**: Vite。
-- **样式方案**: Unocss。简历渲染部分需确保打印样式 (`@media print`) 正确。
-- **语言标准**: TypeScript (Strict Mode)。
-- **Markdown 解析**: 必须使用 `markdown-it` 配合 `markdown-it-container` 插件。
-- **组件库**: 尽量轻量化，编辑器核心建议封装 CodeMirror 或简单的 Textarea。
+## 项目结构
 
-## 关键业务逻辑 (AI 注意)
+PNPM + MONOREPO 项目
 
-在处理 Markdown 解析逻辑时，请遵循以下规则：
+```sh
 
-1. **自定义语法**: 不要试图用 HTML 解析 `:::`, 必须通过 `markdown-it-container` 插件注册 token。
-2. **布局结构**:
-   - `::: row` -> 解析为 `<div class="layout-row">` (Flex 容器)
-   - `::: left` -> 解析为 `<div class="layout-left">` (左栏)
-   - `::: right` -> 解析为 `<div class="layout-right">` (右栏)
-3. **数据流**: 左侧编辑器输入 -> 实时计算属性 (Computed) -> 右侧 `v-html` 渲染。
+apps/frontend   # 编辑器与简历渲染
+apps/backend    # API（用户 / 简历 / 样式）
 
-## 提交与 PR 规范
+```
 
-- 提交前请运行 `pnpm build` 确保无构建错误。
-- 如果修改了 Markdown 解析器的逻辑，请添加对应的单元测试用例。
+## Frontend
+
+### 技术栈
+
+- Vue 3（Composition API, `<script setup>`）
+- Vite
+- TypeScript（Strict）
+- UnoCSS（需保证 `@media print` 正确）
+- Markdown：`markdown-it` + `markdown-it-container`
+- Hooks：`@vueuse/core`
+
+请尽量复用以上技术栈
+
+## Backend
+
+### 职责
+
+- 用户注册 / 登录（JWT）
+- 简历增删改查
+- 简历自定义 CSS 绑定
+- PostgreSQL + ORM
+
+### 约束
+
+- 不解析 Markdown
+- 不生成 HTML
+- 只返回原始数据
+- 所有资源需校验用户归属
