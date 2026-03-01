@@ -1,20 +1,26 @@
 <template>
   <header
-    class="h-16 border-b border-gray-200 bg-white flex items-center px-4 justify-between flex-shrink-0 z-10 sticky top-0 no-print shadow-sm gap-4"
+    class="h-16 border-b border-gray-200 bg-white flex items-center px-4 justify-between shrink-0 z-10 sticky top-0 no-print shadow-sm gap-4"
   >
-    <!-- ================================================= -->
-    <!-- 左侧：导航与元数据 -->
-    <!-- ================================================= -->
     <div class="flex items-center gap-3 min-w-0">
       <n-tooltip trigger="hover">
         <template #trigger>
-          <n-button quaternary circle size="small" @click="$emit('back')">
+          <n-button
+            quaternary
+            circle
+            size="small"
+            aria-label="返回管理台"
+            @click="$emit('back')"
+          >
             <template #icon>
-              <div class="i-lucide:arrow-left text-lg text-gray-500" />
+              <div
+                class="i-lucide:arrow-left text-lg text-gray-500"
+                aria-hidden="true"
+              />
             </template>
           </n-button>
         </template>
-        返回仪表盘
+        返回管理台
       </n-tooltip>
 
       <div class="h-6 w-px bg-gray-200 mx-1"></div>
@@ -26,54 +32,68 @@
           placeholder="未命名简历"
           size="small"
           :bordered="false"
-          class="font-semibold text-base min-w-[200px] hover:bg-gray-50 -ml-2"
+          class="font-semibold text-base min-w-[220px] hover:bg-gray-50 -ml-2"
         />
-        <!-- 保存状态指示器 (Notion 风格) -->
         <div
-          class="text-[10px] flex items-center gap-1.5 cursor-pointer select-none transition-colors -ml-1 px-1 rounded hover:bg-gray-100 w-fit"
-          :class="hasUnsavedChanges ? 'text-amber-600' : 'text-gray-400'"
-          @click="$emit('save')"
+          class="text-[10px] flex items-center gap-1.5 select-none -ml-1 px-1 text-gray-500"
         >
           <div
             :class="
-              hasUnsavedChanges ? 'i-lucide:cloud-off' : 'i-lucide:cloud-check'
+              isAutoSaving
+                ? 'i-lucide:loader-2 animate-spin'
+                : hasUnsavedChanges
+                  ? 'i-lucide:cloud-off'
+                  : 'i-lucide:cloud-check'
             "
             class="text-xs"
           />
-          <span>{{
-            hasUnsavedChanges ? '有未保存更改 (点击保存)' : '已自动保存'
-          }}</span>
+          <span>
+            {{ saveStatusText }}
+          </span>
         </div>
       </div>
     </div>
 
-    <!-- ================================================= -->
-    <!-- 右侧：工具区 -->
-    <!-- ================================================= -->
     <div class="flex items-center gap-2">
-      <!-- 显式保存按钮 -->
       <n-tooltip trigger="hover">
         <template #trigger>
           <n-button
             size="small"
             :type="hasUnsavedChanges ? 'primary' : 'default'"
             :secondary="!hasUnsavedChanges"
-            :disabled="!hasUnsavedChanges"
+            :disabled="!hasUnsavedChanges || isAutoSaving"
             @click="$emit('save')"
           >
             <template #icon>
               <div
-                :class="hasUnsavedChanges ? 'i-lucide:save' : 'i-lucide:check'"
+                :class="
+                  isAutoSaving
+                    ? 'i-lucide:loader-2 animate-spin'
+                    : 'i-lucide:save'
+                "
               />
             </template>
-            {{ hasUnsavedChanges ? '保存' : '已保存' }}
+            保存
           </n-button>
         </template>
-        {{ hasUnsavedChanges ? '保存更改并创建历史快照' : '所有更改已保存' }}
+        快捷键: Ctrl/Cmd + S
       </n-tooltip>
+
       <div class="h-6 w-px bg-gray-200 mx-1"></div>
 
-      <!-- 1. 写作辅助 -->
+      <n-dropdown
+        trigger="click"
+        :options="templateOptions"
+        @select="(key: string) => $emit('apply-template', key)"
+      >
+        <n-button size="small" secondary>
+          <template #icon>
+            <div class="i-lucide:layout-panel-left" />
+          </template>
+          套用模板
+        </n-button>
+      </n-dropdown>
+
       <n-dropdown
         trigger="click"
         :options="snippetOptions"
@@ -81,13 +101,12 @@
       >
         <n-button size="small" secondary>
           <template #icon>
-            <div class="i-lucide:layout-template" />
+            <div class="i-lucide:square-stack" />
           </template>
-          插入模版
+          插入块
         </n-button>
       </n-dropdown>
 
-      <!-- 2. 外观设置 (Popver 收纳) -->
       <n-popover
         trigger="click"
         placement="bottom"
@@ -100,15 +119,13 @@
             <template #icon>
               <div class="i-lucide:palette" />
             </template>
-            外观设置
+            外观
           </n-button>
         </template>
 
-        <!-- 外观面板内容 -->
         <div
           class="w-72 bg-white rounded-lg shadow-xl border border-gray-100 p-4 flex flex-col gap-5"
         >
-          <!-- 主题色 -->
           <div class="flex flex-col gap-2">
             <span
               class="text-xs font-bold text-gray-500 uppercase tracking-wider"
@@ -135,16 +152,14 @@
             </div>
           </div>
 
-          <!-- 排版设置 -->
           <div class="flex flex-col gap-3">
             <span
               class="text-xs font-bold text-gray-500 uppercase tracking-wider"
               >排版</span
             >
-
             <div class="grid grid-cols-2 gap-3">
               <div class="flex flex-col gap-1">
-                <span class="text-xs text-gray-400">页面边距</span>
+                <span class="text-xs text-gray-400">页边距</span>
                 <n-select
                   :value="pageMargin"
                   @update:value="$emit('update:pageMargin', $event)"
@@ -154,7 +169,6 @@
                   size="small"
                 />
               </div>
-
               <div class="flex flex-col gap-1">
                 <span class="text-xs text-gray-400">行高</span>
                 <n-select
@@ -165,7 +179,6 @@
                 />
               </div>
             </div>
-
             <div class="flex flex-col gap-1">
               <span class="text-xs text-gray-400">字体</span>
               <n-select
@@ -179,7 +192,6 @@
 
           <div class="h-px bg-gray-100"></div>
 
-          <!-- 高级 -->
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
               <div class="i-lucide:code text-gray-400" />
@@ -196,32 +208,40 @@
 
       <div class="h-6 w-px bg-gray-200 mx-1"></div>
 
-      <!-- 3. 功能按钮组 -->
       <n-tooltip trigger="hover">
         <template #trigger>
           <n-button
             quaternary
             circle
             size="small"
+            aria-label="版本历史"
             @click="$emit('show-history')"
           >
             <template #icon>
-              <div class="i-lucide:history text-gray-500" />
+              <div
+                class="i-lucide:history text-gray-500"
+                aria-hidden="true"
+              />
             </template>
           </n-button>
         </template>
-        历史记录
+        版本历史
       </n-tooltip>
 
       <n-tooltip trigger="hover">
         <template #trigger>
-          <n-button quaternary circle size="small" @click="$emit('copy')">
+          <n-button
+            quaternary
+            circle
+            size="small"
+            aria-label="复制 Markdown"
+            @click="$emit('copy')"
+          >
             <template #icon>
-              <div class="i-lucide:copy text-gray-500" />
+              <div class="i-lucide:copy text-gray-500" aria-hidden="true" />
             </template>
           </n-button>
         </template>
-
         复制 Markdown
       </n-tooltip>
 
@@ -231,17 +251,20 @@
             quaternary
             circle
             size="small"
+            aria-label="导出 Markdown"
             @click="$emit('export-markdown')"
           >
             <template #icon>
-              <div class="i-lucide:file-down text-gray-500" />
+              <div
+                class="i-lucide:file-down text-gray-500"
+                aria-hidden="true"
+              />
             </template>
           </n-button>
         </template>
         导出 Markdown
       </n-tooltip>
 
-      <!-- 导出 PDF (主按钮) -->
       <n-button
         type="primary"
         size="small"
@@ -259,6 +282,7 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import type { DropdownOption } from 'naive-ui';
 import {
   THEME_COLORS,
@@ -266,6 +290,7 @@ import {
   LINE_HEIGHT_OPTIONS,
   FONT_OPTIONS,
 } from '../composables/useResumeSettings';
+import { RESUME_TEMPLATES } from '../constants/templates';
 
 const snippetOptions: DropdownOption[] = [
   {
@@ -288,23 +313,19 @@ const snippetOptions: DropdownOption[] = [
     label: '对齐方式',
     key: 'alignments',
     children: [
-      {
-        label: '左对齐 (left)',
-        key: '\n::: left\n\n:::\n',
-      },
-      {
-        label: '居中对齐 (center)',
-        key: '\n::: center\n\n:::\n',
-      },
-      {
-        label: '右对齐 (right)',
-        key: '\n::: right\n\n:::\n',
-      },
+      { label: '左对齐 (left)', key: '\n::: left\n\n:::\n' },
+      { label: '居中 (center)', key: '\n::: center\n\n:::\n' },
+      { label: '右对齐 (right)', key: '\n::: right\n\n:::\n' },
     ],
   },
 ];
 
-defineProps<{
+const templateOptions: DropdownOption[] = RESUME_TEMPLATES.map((item) => ({
+  label: `${item.name} · ${item.description}`,
+  key: item.id,
+}));
+
+const props = defineProps<{
   title: string;
   themeColor: string;
   pageMargin: number;
@@ -314,7 +335,22 @@ defineProps<{
   isRendering: boolean;
   copied: boolean;
   hasUnsavedChanges: boolean;
+  isAutoSaving: boolean;
+  lastSavedAt: number | null;
 }>();
+
+const saveStatusText = computed(() => {
+  if (props.isAutoSaving) return '自动保存中...';
+  if (props.hasUnsavedChanges) return '有未保存更改';
+  if (props.lastSavedAt) {
+    return `已保存于 ${new Date(props.lastSavedAt).toLocaleTimeString('zh-CN', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    })}`;
+  }
+  return '已同步';
+});
 
 defineEmits<{
   (e: 'back'): void;
@@ -328,6 +364,7 @@ defineEmits<{
   (e: 'print'): void;
   (e: 'export-markdown'): void;
   (e: 'insert-snippet', snippet: string): void;
+  (e: 'apply-template', templateId: string): void;
   (e: 'save'): void;
   (e: 'show-history'): void;
 }>();

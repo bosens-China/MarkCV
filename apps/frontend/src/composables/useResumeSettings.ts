@@ -2,7 +2,8 @@
  * 简历设置 Composable
  * 管理简历的主题色、边距、行高、字体等设置
  */
-import { ref, type Ref } from 'vue';
+import { ref, toValue, type Ref } from 'vue';
+import type { MaybeRefOrGetter } from 'vue';
 
 /**
  * 主题色选项
@@ -64,12 +65,13 @@ export interface ResumeSettings {
 
 /**
  * useResumeSettings Composable
+ * 支持传入普通值、ref 或 getter 作为初始设置
  * @param initialSettings - 初始设置值
  */
 export function useResumeSettings(
-  initialSettings?: Partial<typeof DEFAULT_SETTINGS>,
+  initialSettings?: MaybeRefOrGetter<Partial<typeof DEFAULT_SETTINGS>>,
 ): ResumeSettings {
-  const settings = { ...DEFAULT_SETTINGS, ...initialSettings };
+  const settings = { ...DEFAULT_SETTINGS, ...toValue(initialSettings) };
 
   return {
     themeColor: ref(settings.themeColor),

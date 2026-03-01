@@ -17,13 +17,17 @@ declare module 'pagedjs' {
       content: string | HTMLElement,
       stylesheets: string[],
       renderTo: HTMLElement,
-    ): Promise<any>;
-    registerHandlers(handlers: any[]): void;
-    remove(): void; // Assuming remove exists or we handle cleanup manually
+    ): Promise<unknown>;
+    registerHandlers(handlers: Handler[]): void;
+    remove(): void;
   }
 
   export interface Handler {
-    new (chunker: Chunker, polisher: Polisher, caller: any): any;
+    new (
+      chunker: Chunker,
+      polisher: Polisher,
+      caller: unknown,
+    ): unknown;
   }
 
   export function registerHandlers(handlers: Handler[]): void;

@@ -5,6 +5,7 @@ import './styles/index.css';
 import App from './App.vue';
 import router from './router';
 import 'virtual:uno.css';
+import '@unocss/reset/tailwind-compat.css';
 import '@fontsource/noto-sans-sc/400.css';
 import '@fontsource/noto-sans-sc/500.css';
 import '@fontsource/noto-sans-sc/700.css';

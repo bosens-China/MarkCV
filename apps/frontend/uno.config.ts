@@ -34,5 +34,11 @@ export default defineConfig({
     'toolbar-label': 'text-xs text-gray-400 font-medium',
     // 隐藏滚动条
     'scrollbar-hide': 'scrollbar-width-none [&::-webkit-scrollbar]:hidden',
+    // 按钮样式
+    'btn': 'inline-flex items-center justify-center gap-2 font-medium transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
+    'btn-lg': 'btn px-7 py-3.5 text-[15px] font-semibold rounded-[10px]',
+    'btn-primary': 'btn px-6 py-3 text-[15px] font-semibold rounded-[10px] text-white bg-gradient-to-br from-gray-900 to-gray-700 shadow-lg shadow-black/20 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/25',
+    'btn-outline': 'btn-lg bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:border-gray-300',
+    'btn-ghost': 'btn px-4 py-2 text-sm rounded-lg text-gray-600 hover:bg-gray-100',
   },
 });

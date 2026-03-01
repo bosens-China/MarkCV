@@ -1,26 +1,25 @@
-import { ref, watch, onBeforeUnmount, nextTick } from 'vue';
-import type { Ref } from 'vue';
+import { ref, watch, onBeforeUnmount, nextTick, toRef } from 'vue';
+import type { MaybeRefOrGetter } from 'vue';
 import { useDebounceFn } from '@vueuse/core';
+import { useMessage } from 'naive-ui';
 import { Previewer } from 'pagedjs';
 
 interface UsePagedOptions {
-  content: Ref<string>;
-  themeColor: Ref<string>;
-  pageMargin: Ref<number>;
-  lineHeight: Ref<number>;
-  currentFont: Ref<string>;
-  customCss: Ref<string>;
+  content: MaybeRefOrGetter<string>;
+  themeColor: MaybeRefOrGetter<string>;
+  pageMargin: MaybeRefOrGetter<number>;
+  lineHeight: MaybeRefOrGetter<number>;
+  currentFont: MaybeRefOrGetter<string>;
+  customCss: MaybeRefOrGetter<string>;
 }
 
 export function usePaged(options: UsePagedOptions) {
-  const {
-    content,
-    themeColor,
-    pageMargin,
-    lineHeight,
-    currentFont,
-    customCss,
-  } = options;
+  const content = toRef(options.content);
+  const themeColor = toRef(options.themeColor);
+  const pageMargin = toRef(options.pageMargin);
+  const lineHeight = toRef(options.lineHeight);
+  const currentFont = toRef(options.currentFont);
+  const customCss = toRef(options.customCss);
 
   const previewTarget = ref<HTMLElement | null>(null);
   const sourceContent = ref<HTMLElement | null>(null);
@@ -118,8 +117,8 @@ export function usePaged(options: UsePagedOptions) {
           previewTarget.value,
         );
         lastRenderedHash = currentHash;
-      } catch (error) {
-        console.error('Paged.js 渲染失败:', error);
+      } catch {
+        useMessage().error('简历预览渲染失败，请刷新页面重试');
       } finally {
         isRendering.value = false;
       }

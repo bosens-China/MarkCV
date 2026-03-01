@@ -62,6 +62,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { Codemirror } from 'vue-codemirror';
+import type { EditorView } from '@codemirror/view';
 import { Splitpanes, Pane } from 'splitpanes';
 import 'splitpanes/dist/splitpanes.css';
 import { markdown } from '@codemirror/lang-markdown';
@@ -78,7 +79,7 @@ const emit = defineEmits<{
   (e: 'update:content', value: string): void;
   (e: 'update:customCss', value: string): void;
   (e: 'change'): void;
-  (e: 'editor-ready', view: any): void;
+  (e: 'editor-ready', view: EditorView): void;
 }>();
 
 const localContent = computed({
@@ -94,7 +95,7 @@ const localCustomCss = computed({
 const editorExtensions = [markdown(), oneDark];
 const cssExtensions = [css(), oneDark];
 
-const handleEditorReady = (payload: any) => {
+const handleEditorReady = (payload: { view: EditorView }) => {
   emit('editor-ready', payload.view);
 };
 

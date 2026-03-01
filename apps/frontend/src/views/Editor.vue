@@ -1,11 +1,10 @@
-<template>
+﻿<template>
   <div class="h-screen flex flex-col bg-gray-50">
     <div v-if="!isReady" class="h-full flex items-center justify-center">
       <div class="animate-spin i-lucide:loader-2 text-blue-500 text-2xl"></div>
     </div>
 
     <template v-else>
-      <!-- 顶部工具栏 -->
       <EditorToolbar
         v-model:title="resumeTitle"
         v-model:themeColor="themeColor"
@@ -16,19 +15,20 @@
         :is-rendering="isRendering"
         :copied="copied"
         :has-unsaved-changes="isDirty"
-        @back="router.push('/')"
+        :is-auto-saving="isAutoSaving"
+        :last-saved-at="lastSavedAt"
+        @back="router.push('/dashboard')"
         @copy="copyMarkdown"
         @print="handlePrint"
         @export-markdown="exportMarkdown"
         @insert-snippet="insertSnippet"
+        @apply-template="handleApplyTemplate"
         @save="handleManualSave"
         @show-history="showHistoryDrawer = true"
       />
 
-      <!-- 主内容区 -->
       <div class="flex-1 overflow-hidden relative">
         <splitpanes class="default-theme" style="height: 100%">
-          <!-- 左侧: 编辑器区域 -->
           <pane min-size="20" :size="50">
             <EditorPane
               v-model:content="content"
@@ -39,7 +39,6 @@
             />
           </pane>
 
-          <!-- 右侧: 预览区 -->
           <pane min-size="20" :size="50">
             <PreviewPane
               ref="previewPaneRef"
@@ -54,11 +53,11 @@
         </splitpanes>
       </div>
 
-      <!-- 历史记录抽屉 -->
       <HistoryDrawer
         v-model:show="showHistoryDrawer"
         :history="currentResumeHistory"
         :active-timestamp="activeHistoryTimestamp"
+        :loading="isHistoryLoading"
         @restore="handleRestore"
       />
     </template>
@@ -66,37 +65,44 @@
 </template>
 
 <script setup lang="ts">
-import { ref, shallowRef, computed, watch, onBeforeUnmount } from 'vue';
+import { computed, ref, shallowRef, watch, onBeforeUnmount } from 'vue';
 import { useRoute, useRouter, onBeforeRouteLeave } from 'vue-router';
-import { useClipboard } from '@vueuse/core';
+import { useClipboard, useDebounceFn, useEventListener } from '@vueuse/core';
 import { storeToRefs } from 'pinia';
+import type { EditorView } from '@codemirror/view';
 import { Splitpanes, Pane } from 'splitpanes';
 import 'splitpanes/dist/splitpanes.css';
 import { useMessage } from 'naive-ui';
-
-// Composables
 import { useMarkdown } from '../composables/useMarkdown';
 import { useResumeStore, type ResumeHistoryItem } from '../stores/resume';
-
-// Components
 import EditorToolbar from '../components/EditorToolbar.vue';
 import HistoryDrawer from '../components/HistoryDrawer.vue';
 import EditorPane from '../components/EditorPane.vue';
 import PreviewPane from '../components/PreviewPane.vue';
+import { RESUME_TEMPLATES } from '../constants/templates';
 
-// ============================================================================
-// 路由与 Store
-// ============================================================================
+defineOptions({
+  name: 'ResumeEditorPage',
+});
+
+interface LocalBackupPayload {
+  title: string;
+  content: string;
+  themeColor: string;
+  pageMargin: number;
+  lineHeight: number;
+  currentFont: string;
+  customCss: string;
+  savedAt: number;
+}
+
 const route = useRoute();
 const router = useRouter();
 const message = useMessage();
 const resumeStore = useResumeStore();
 const { isReady } = storeToRefs(resumeStore);
-const resumeId = route.params.id as string;
+const resumeId = computed(() => route.params.id as string);
 
-// ============================================================================
-// 简历数据状态
-// ============================================================================
 const resumeTitle = ref('');
 const content = ref('');
 const currentFont = ref('font-sans');
@@ -105,71 +111,93 @@ const pageMargin = ref(20);
 const lineHeight = ref(1.5);
 const customCss = ref('');
 const showCssPane = ref(false);
-const isDirty = ref(false); // 未保存状态
+const isDirty = ref(false);
+const isAutoSaving = ref(false);
+const isHistoryLoading = ref(false);
 const showHistoryDrawer = ref(false);
+const lastSavedAt = ref<number | null>(null);
+const isHydrating = ref(false);
 
 const previewPaneRef = ref<InstanceType<typeof PreviewPane> | null>(null);
 const isRendering = computed(() => previewPaneRef.value?.isRendering || false);
 
 const currentResumeHistory = computed(() => {
-  const resume = resumeStore.getResume(resumeId);
+  const resume = resumeStore.getResume(resumeId.value);
   return resume?.history || [];
 });
 
 const activeHistoryTimestamp = computed(() => {
-  const resume = resumeStore.getResume(resumeId);
+  const resume = resumeStore.getResume(resumeId.value);
   return resume?.activeHistoryTimestamp;
 });
 
-// ============================================================================
-// 初始化加载
-// ============================================================================
-const loadResume = () => {
-  const resume = resumeStore.getResume(resumeId);
-  if (resume) {
-    resumeTitle.value = resume.title;
-    content.value = resume.content;
-    if (resume.themeColor) themeColor.value = resume.themeColor;
-    if (resume.pageMargin !== undefined) pageMargin.value = resume.pageMargin;
-    if (resume.lineHeight !== undefined) lineHeight.value = resume.lineHeight;
-    if (resume.customCss) customCss.value = resume.customCss;
-  } else {
-    // 简历不存在
-    router.replace('/');
+const editorView = shallowRef<EditorView | null>(null);
+
+const backupStorageKey = computed(() => `markcv:resume-backup:${resumeId.value}`);
+
+const buildLocalSnapshot = (): LocalBackupPayload => ({
+  title: resumeTitle.value,
+  content: content.value,
+  themeColor: themeColor.value,
+  pageMargin: pageMargin.value,
+  lineHeight: lineHeight.value,
+  currentFont: currentFont.value,
+  customCss: customCss.value,
+  savedAt: Date.now(),
+});
+
+const applySnapshot = (snapshot: LocalBackupPayload) => {
+  resumeTitle.value = snapshot.title;
+  content.value = snapshot.content;
+  themeColor.value = snapshot.themeColor;
+  pageMargin.value = snapshot.pageMargin;
+  lineHeight.value = snapshot.lineHeight;
+  currentFont.value = snapshot.currentFont;
+  customCss.value = snapshot.customCss;
+};
+
+const readLocalBackup = (): LocalBackupPayload | null => {
+  const raw = localStorage.getItem(backupStorageKey.value);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as LocalBackupPayload;
+  } catch {
+    localStorage.removeItem(backupStorageKey.value);
+    return null;
   }
 };
 
-watch(
-  isReady,
-  (ready) => {
-    if (ready) {
-      loadResume();
-    }
-  },
-  { immediate: true },
-);
+const writeLocalBackup = () => {
+  const payload = buildLocalSnapshot();
+  localStorage.setItem(backupStorageKey.value, JSON.stringify(payload));
+};
 
-// ============================================================================
-// 编辑器实例
-// ============================================================================
-const editorView = shallowRef<any>(null);
+const clearLocalBackup = () => {
+  localStorage.removeItem(backupStorageKey.value);
+};
 
-const handleEditorReady = (view: any) => {
+const hasMeaningfulBackup = (backup: LocalBackupPayload) => {
+  const current = buildLocalSnapshot();
+  return (
+    backup.title !== current.title ||
+    backup.content !== current.content ||
+    backup.themeColor !== current.themeColor ||
+    backup.pageMargin !== current.pageMargin ||
+    backup.lineHeight !== current.lineHeight ||
+    backup.currentFont !== current.currentFont ||
+    backup.customCss !== current.customCss
+  );
+};
+
+const handleEditorReady = (view: EditorView) => {
   editorView.value = view;
 };
 
-// ============================================================================
-// Markdown 解析
-// ============================================================================
 const { renderedContent } = useMarkdown(content);
-
-// ============================================================================
-// 剪贴板、导出与模板插入
-// ============================================================================
 const { copy, copied } = useClipboard();
 
 const copyMarkdown = () => {
-  copy(content.value);
+  void copy(content.value);
   message.success('Markdown 内容已复制');
 };
 
@@ -192,8 +220,6 @@ const insertSnippet = (snippet: string) => {
 
   const from = view.state.selection.main.head;
   let cursorPos = from + snippet.length;
-
-  // 智能光标定位
   const rowBlockPos = snippet.indexOf('::: left\n');
   if (rowBlockPos !== -1) {
     cursorPos = from + rowBlockPos + '::: left\n'.length + 1;
@@ -207,77 +233,240 @@ const insertSnippet = (snippet: string) => {
   view.focus();
 };
 
-// ============================================================================
-// 数据持久化与未保存拦截
-// ============================================================================
-const onContentChange = () => {
-  isDirty.value = true;
+const loadVersions = async () => {
+  try {
+    isHistoryLoading.value = true;
+    await resumeStore.loadRemoteVersions(resumeId.value);
+  } finally {
+    isHistoryLoading.value = false;
+  }
 };
 
-const handleManualSave = async () => {
-  // 更新 store 状态
-  resumeStore.updateResume(resumeId, {
+const loadResume = async () => {
+  try {
+    const resume = await resumeStore.fetchResumeById(resumeId.value);
+    if (!resume) {
+      router.replace('/');
+      return;
+    }
+
+    isHydrating.value = true;
+    applySnapshot({
+      title: resume.title,
+      content: resume.content,
+      themeColor: resume.themeColor,
+      pageMargin: resume.pageMargin,
+      lineHeight: resume.lineHeight,
+      currentFont: resume.currentFont,
+      customCss: resume.customCss,
+      savedAt: resume.updatedAt,
+    });
+    isDirty.value = false;
+    isHydrating.value = false;
+
+    const backup = readLocalBackup();
+    if (backup && hasMeaningfulBackup(backup)) {
+      const useBackup = window.confirm(
+        '检测到本地备份内容，是否采用本地备份？',
+      );
+      if (useBackup) {
+        isHydrating.value = true;
+        applySnapshot(backup);
+        isHydrating.value = false;
+        isDirty.value = true;
+        message.warning('已采用本地备份，请确认后保存');
+      }
+      clearLocalBackup();
+    }
+
+    await loadVersions();
+  } catch {
+    message.error('加载简历失败');
+    router.replace('/');
+  } finally {
+    isHydrating.value = false;
+  }
+};
+
+// 监听路由参数变化，重新加载简历
+watch(
+  () => route.params.id,
+  () => {
+    if (isReady.value) {
+      void loadResume();
+    }
+  },
+);
+
+// 初始加载
+watch(
+  isReady,
+  (ready) => {
+    if (ready) {
+      void loadResume();
+    }
+  },
+  { immediate: true },
+);
+
+watch(showHistoryDrawer, (visible) => {
+  if (visible) {
+    void loadVersions();
+  }
+});
+
+const persistCurrentResume = async () => {
+  resumeStore.updateResume(resumeId.value, {
     title: resumeTitle.value,
     content: content.value,
     themeColor: themeColor.value,
     pageMargin: pageMargin.value,
     lineHeight: lineHeight.value,
+    currentFont: currentFont.value,
     customCss: customCss.value,
   });
-
-  // 持久化到存储
-  await resumeStore.saveData();
-
-  // 创建历史快照
-  resumeStore.addHistorySnapshot(resumeId);
-
-  isDirty.value = false;
-  message.success('保存成功');
+  await resumeStore.saveRemote(resumeId.value);
 };
+
+const handleManualSave = async () => {
+  try {
+    isAutoSaving.value = true;
+    writeLocalBackup();
+    await persistCurrentResume();
+    await resumeStore.createVersionSnapshot(resumeId.value);
+    await loadVersions();
+    clearLocalBackup();
+    isDirty.value = false;
+    lastSavedAt.value = Date.now();
+    message.success('保存成功');
+  } catch {
+    message.error('保存失败，已保留本地备份');
+  } finally {
+    isAutoSaving.value = false;
+  }
+};
+
+const triggerAutoSave = useDebounceFn(async () => {
+  if (!isDirty.value || isAutoSaving.value) return;
+  try {
+    isAutoSaving.value = true;
+    writeLocalBackup();
+    await persistCurrentResume();
+    clearLocalBackup();
+    isDirty.value = false;
+    lastSavedAt.value = Date.now();
+  } catch {
+    // 鑷姩淇濆瓨澶辫触鏃朵繚鐣欐湰鍦板浠斤紝绛夊緟鐢ㄦ埛鎵嬪姩澶勭悊
+  } finally {
+    isAutoSaving.value = false;
+  }
+}, 1200);
 
 const handleRestore = async (item: ResumeHistoryItem) => {
-  content.value = item.content;
-  if (item.title) resumeTitle.value = item.title;
-  // 恢复后立即触发保存
-  await handleManualSave();
-  message.success('已恢复到选定版本');
+  try {
+    if (item.versionId) {
+      const restored = await resumeStore.restoreVersion(resumeId.value, item.versionId);
+      if (restored) {
+        isHydrating.value = true;
+        applySnapshot({
+          title: restored.title,
+          content: restored.content,
+          themeColor: restored.themeColor,
+          pageMargin: restored.pageMargin,
+          lineHeight: restored.lineHeight,
+          currentFont: restored.currentFont,
+          customCss: restored.customCss,
+          savedAt: restored.updatedAt,
+        });
+        isHydrating.value = false;
+      }
+    } else {
+      isHydrating.value = true;
+      content.value = item.content;
+      if (item.title) resumeTitle.value = item.title;
+      isHydrating.value = false;
+      await persistCurrentResume();
+    }
+
+    clearLocalBackup();
+    await loadVersions();
+    isDirty.value = false;
+    lastSavedAt.value = Date.now();
+    message.success('已恢复到选定版本');
+  } catch {
+    message.error('恢复版本失败');
+  } finally {
+    isHydrating.value = false;
+  }
 };
 
-// 监听其他UI控件变化以标记为未保存
-watch([resumeTitle, themeColor, pageMargin, lineHeight, currentFont], () => {
-  onContentChange();
+const handleApplyTemplate = async (templateId: string) => {
+  const selected = RESUME_TEMPLATES.find((item) => item.id === templateId);
+  if (!selected) return;
+
+  const confirmed = window.confirm(
+    `确定应用模板「${selected.name}」吗？当前内容将被覆盖。`,
+  );
+  if (!confirmed) return;
+
+  resumeTitle.value = selected.title;
+  content.value = selected.content;
+  isDirty.value = true;
+  writeLocalBackup();
+  await triggerAutoSave();
+  message.success(`已应用模板：${selected.name}`);
+};
+
+const onContentChange = () => {
+  if (isHydrating.value) return;
+  isDirty.value = true;
+  writeLocalBackup();
+  void triggerAutoSave();
+};
+
+watch(
+  [resumeTitle, themeColor, pageMargin, lineHeight, currentFont, customCss],
+  () => {
+    if (isHydrating.value) return;
+    isDirty.value = true;
+    writeLocalBackup();
+    void triggerAutoSave();
+  },
+);
+
+useEventListener(window, 'keydown', (event: KeyboardEvent) => {
+  const isSaveKey =
+    (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's';
+  if (!isSaveKey) return;
+  event.preventDefault();
+  void handleManualSave();
 });
 
-// 路由离开拦截
 onBeforeRouteLeave((_to, _from, next) => {
-  if (isDirty.value) {
-    const answer = window.confirm('您有未保存的更改，确定要离开吗？');
-    if (answer) {
-      next();
-    }
-  } else {
-    next();
+  if (isDirty.value || isAutoSaving.value) {
+    const answer = window.confirm('有未保存更改，确定离开吗？');
+    if (answer) next();
+    return;
   }
+  next();
 });
 
-// 窗口关闭/刷新拦截
 const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-  if (isDirty.value) {
+  if (isDirty.value || isAutoSaving.value) {
     e.preventDefault();
     e.returnValue = '';
   }
 };
 
 window.addEventListener('beforeunload', handleBeforeUnload);
-
 onBeforeUnmount(() => {
   window.removeEventListener('beforeunload', handleBeforeUnload);
 });
 
-// ============================================================================
-// 打印功能
-// ============================================================================
 const handlePrint = () => {
   previewPaneRef.value?.print();
 };
 </script>
+
+
+

@@ -18,11 +18,20 @@ import { zhCN, dateZhCN } from 'naive-ui';
 import type { GlobalThemeOverrides } from 'naive-ui';
 import { onMounted } from 'vue';
 import { useResumeStore } from './stores/resume';
+import { useAuthStore } from './stores/auth';
 
 const resumeStore = useResumeStore();
+const authStore = useAuthStore();
 
 onMounted(() => {
-  resumeStore.init();
+  void (async () => {
+    await authStore.init();
+    if (authStore.isAuthenticated) {
+      await resumeStore.init();
+      return;
+    }
+    resumeStore.markReady();
+  })();
 });
 
 /**
