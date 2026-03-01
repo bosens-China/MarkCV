@@ -1,0 +1,48 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-markcv}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-markcv_prod_password}
+      POSTGRES_DB: ${POSTGRES_DB:-markcv_prod}
+    volumes:
+      - markcv_postgres_data:/var/lib/postgresql/data
+      - ./apps/backend/docker/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-markcv} -d ${POSTGRES_DB:-markcv_prod}']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    image: boses/markcv-backend:latest
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgres://${POSTGRES_USER:-markcv}:${POSTGRES_PASSWORD:-markcv_prod_password}@postgres:5432/${POSTGRES_DB:-markcv_prod}
+      FRONTEND_URL: ${FRONTEND_URL:?FRONTEND_URL is required}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:?GITHUB_CLIENT_ID is required}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:?GITHUB_CLIENT_SECRET is required}
+      GITHUB_CALLBACK_URL: ${GITHUB_CALLBACK_URL:?GITHUB_CALLBACK_URL is required}
+      COOKIE_SECRET: ${COOKIE_SECRET:?COOKIE_SECRET is required}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - '${BACKEND_PORT:-3000}:3000'
+
+  frontend:
+    image: boses/markcv-frontend:latest
+    restart: unless-stopped
+    environment:
+      # nginx 反向代理的后端地址
+      BACKEND_URL: ${BACKEND_URL:-http://backend:3000}
+    depends_on:
+      - backend
+    ports:
+      - '${FRONTEND_PORT:-8080}:80'
+
+volumes:
+  markcv_postgres_data:

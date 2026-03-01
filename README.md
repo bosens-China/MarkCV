@@ -1,96 +1,158 @@
 # MarkCV
 
-MarkCV 是一个极简、专注且强大的在线简历编辑器，专为程序员、产品经理及所有崇尚“内容为王”的创作者设计。
+[![Docker Hub](https://img.shields.io/badge/Docker%20Hub-boses%2Fmarkcv-blue)](https://hub.docker.com/r/boses/markcv-backend)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-它基于 **Markdown** 和 **CSS**，致力于提供最纯粹的写作体验，让你摆脱繁杂的排版干扰，专注于打磨简历内容本身。
+开源的在线 Markdown 简历制作工具，支持实时预览、云端同步和 PDF 导出。
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Vue 3](https://img.shields.io/badge/vue-3.x-green.svg)
-![TypeScript](https://img.shields.io/badge/language-TypeScript-blue.svg)
+**在线体验**: https://markcv.xiaowo.live
 
-## ✨ 核心特性
+![Tech Stack](https://img.shields.io/badge/Vue%203-4FC08D?logo=vue.js&logoColor=white)
+![Tech Stack](https://img.shields.io/badge/Fastify-000000?logo=fastify&logoColor=white)
+![Tech Stack](https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white)
 
-- **Markdown 驱动**：使用你最熟悉的语法编写简历，支持实时预览。
-- **专业排版引擎**：基于 [Paged.js](https://pagedjs.org/)，完美模拟 A4 纸张排版，所见即所得。
-- **灵活布局**：
-  - 内置 `::: row` 双栏、`::: cols-3` 三栏等自定义容器语法。
-  - 支持 `::: left`, `::: right`, `::: center` 对齐控制。
-- **隐私优先**：所有数据（包括历史记录）仅保存在浏览器本地 (LocalStorage)，无服务器端存储，安全无忧。
-- **版本回溯**：支持创建历史快照，随时回滚到任意版本的简历状态。
-- **完全免费**：开源且免费，不受任何付费墙或导出限制。
+---
 
-## 🚀 快速开始
+## 功能特点
 
-### 前置要求
+- ✍️ **Markdown 编辑** - 使用熟悉的 Markdown 语法编写简历
+- 👁️ **实时预览** - 边写边看，所见即所得
+- 📄 **PDF 导出** - 基于 Paged.js 的 A4 分页预览
+- ☁️ **云端同步** - GitHub 登录，数据自动同步
+- 🎨 **自定义样式** - 支持主题色、字体、边距自定义
 
-- [Node.js](https://nodejs.org/) (推荐 v18+)
-- [pnpm](https://pnpm.io/) (推荐) 或 npm/yarn
+---
 
-### 安装与运行
+## 版本选择
+
+| 版本 | 地址 | 特点 |
+|------|------|------|
+| **在线版（推荐）** | https://markcv.xiaowo.live | GitHub 登录、云端同步、多设备访问 |
+| **纯本地版** | https://bosens-china.github.io/MarkCV/ | 无需登录、数据存在浏览器、纯静态 |
+
+> 纯本地版适合不想使用联网功能的用户，数据完全保留在本地浏览器。
+
+---
+
+## 快速开始
+
+### 方式一：Docker Compose（推荐）
 
 ```bash
-# 克隆仓库
-git clone https://github.com/yourusername/mark-cv.git
+# 1. 克隆项目
+git clone https://github.com/bosens-China/MarkCV.git
+cd MarkCV
 
-# 进入目录
-cd mark-cv
+# 2. 复制并填写配置
+cp .env.prod.example .env.prod
+# 编辑 .env.prod，配置 GitHub OAuth 等信息
 
+# 3. 启动
+docker compose --env-file .env.prod -f docker-compose.prod.yml up -d
+```
+
+访问 http://localhost:8080
+
+### 方式二：本地开发
+
+```bash
 # 安装依赖
 pnpm install
 
-# 启动开发服务器
-pnpm run dev
+# 启动数据库
+cd apps/backend && docker compose up -d
+
+# 配置环境变量
+cp apps/backend/.env.example apps/backend/.env
+cp apps/frontend/.env.example apps/frontend/.env
+# 编辑 .env 文件，配置 GitHub OAuth
+
+# 启动后端
+pnpm --filter @mark-cv/api dev
+
+# 启动前端（新终端）
+pnpm --filter @mark-cv/frontend dev
 ```
 
-打开浏览器访问 `http://localhost:5173` 即可开始使用。
+- 前端：http://localhost:5173
+- 后端：http://localhost:3000
 
-## 🛠️ 技术栈
+---
 
-- **框架**: Vue 3 + TypeScript + Vite
-- **UI 库**: Naive UI + UnoCSS
-- **编辑器**: CodeMirror 6
-- **排版**: Paged.js + Markdown-it
-- **状态管理**: Pinia (配合持久化插件)
+## 配置 GitHub OAuth
 
-## 📝 使用指南
+1. 登录 GitHub → Settings → Developer settings → [OAuth Apps](https://github.com/settings/developers)
+2. 点击 "New OAuth App"
+3. 填写信息：
+   - **Application name**: MarkCV
+   - **Homepage URL**: 你的域名（如 `https://markcv.xiaowo.live`）
+   - **Authorization callback URL**: `https://你的域名/api/v1/auth/github/callback`
+4. 保存后获取 **Client ID** 和 **Client Secret**
+5. 填入 `.env` 或 `.env.prod` 文件
 
-### 自定义布局
+---
 
-MarkCV 扩展了 Markdown 语法以支持简历常见的布局需求：
+## 项目结构
 
-**双栏布局：**
-```markdown
-:::: row
-::: left
-**联系方式**
-- 📞 123-456-7890
-:::
-
-::: right
-# 你的名字
-## 职位头衔
-:::
-::::
+```
+apps/
+  frontend/   # Vue 3 前端
+  backend/    # Fastify 后端 API
+docker-compose.prod.yml  # 生产部署配置
 ```
 
-**三栏布局：**
-```markdown
-:::: cols-3
-<div>栏目一</div>
-<div>栏目二</div>
-<div>栏目三</div>
-::::
+详细说明：
+- [前端文档](apps/frontend/README.md)
+- [后端文档](apps/backend/README.md)
+
+---
+
+## 环境变量
+
+| 变量 | 说明 | 示例 |
+|------|------|------|
+| `GITHUB_CLIENT_ID` | GitHub OAuth Client ID | `Iv1.xxx` |
+| `GITHUB_CLIENT_SECRET` | GitHub OAuth Client Secret | `xxx` |
+| `GITHUB_CALLBACK_URL` | OAuth 回调地址 | `https://xxx/api/v1/auth/github/callback` |
+| `FRONTEND_URL` | 前端地址 | `https://xxx` |
+| `COOKIE_SECRET` | Cookie 加密密钥 | 随机字符串（至少32位）|
+| `POSTGRES_PASSWORD` | 数据库密码 | 随机字符串 |
+
+---
+
+## Docker 镜像
+
+镜像已发布到 Docker Hub：
+
+```bash
+# 后端
+docker pull boses/markcv-backend:latest
+
+# 前端
+docker pull boses/markcv-frontend:latest
 ```
 
-### 导出
+---
 
-点击顶部工具栏的 **"导出 PDF"** 按钮，系统将调用浏览器原生打印功能。请确保在打印设置中：
-- 目标打印机选择 **"另存为 PDF"**
-- 纸张尺寸选择 **A4**
-- 勾选 **"背景图形"** (Background graphics) 以确保样式正确渲染
+## 贡献
 
-## 📄 许可证
+欢迎 Issue 和 PR！
 
-本项目基于 [MIT 许可证](LICENSE) 开源。
+- 提交 Issue: https://github.com/bosens-China/MarkCV/issues
+- 提交 PR: https://github.com/bosens-China/MarkCV/pulls
 
-Copyright (c) 2026 yliu
+---
+
+## License
+
+[MIT](LICENSE)
+
+## 生产部署必填项（2026-03）
+
+使用 `docker-compose.prod.yml` 部署时，以下变量必须在 `.env.prod` 中显式设置，否则 `docker compose` 会直接报错退出：
+
+- `FRONTEND_URL`
+- `GITHUB_CALLBACK_URL`
+- `GITHUB_CLIENT_ID`
+- `GITHUB_CLIENT_SECRET`
+- `COOKIE_SECRET`
