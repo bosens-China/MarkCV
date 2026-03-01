@@ -1,53 +1,23 @@
-# AGENTS.md
+# AGENTS.md（AI 书写简历）
 
-## 项目说明
-
-这是一个 **前后端分离** 的在线 Markdown 简历制作平台。
-
-- **Frontend**：Vue 3 + Vite，用于 Markdown 编辑与渲染
-- **Backend**：API 服务，负责用户体系与简历数据持久化（PostgreSQL）
+这个是一个面向C端的简历书写平台，目前群体是互联网从业人员。
 
 ## 通用要求
 
-1. 代码注释在必要时添加，保持代码可读性。
-2. 代码注释和回复使用中文。
+- 使用Typescript
+- 代码和回复使用中文
+- 编写的代码需要符合最佳工程实践
+- 避免出现 any类型，不知道的可以使用 unknown 替代
+- 注意操作系统，不同系统的命令调用方式不同
 
-## 项目结构
+## 前端要求
 
-PNPM + MONOREPO 项目
+- 优先使用unocss书写代码，复杂样式可以使用style
+- 优先考虑复用vueuse和naive-ui库，非必要不手动造轮子
+- 书写完成后运行 pnpm run build 和 pnpm run lint 检查代码质量
+- 创建vue组件的时候，注意避免出现 `Component name "Home" should always be multi-word.` 错误
+- 可以使用 @ 导入项目的文件，@代表项目/src目录
 
-```sh
+## 后端要求
 
-apps/frontend   # 编辑器与简历渲染
-apps/backend    # API（用户 / 简历 / 样式）
-
-```
-
-## Frontend
-
-### 技术栈
-
-- Vue 3（Composition API, `<script setup>`）
-- Vite
-- TypeScript（Strict）
-- UnoCSS（需保证 `@media print` 正确）
-- Markdown：`markdown-it` + `markdown-it-container`
-- Hooks：`@vueuse/core`
-
-请尽量复用以上技术栈
-
-## Backend
-
-### 职责
-
-- 用户注册 / 登录（JWT）
-- 简历增删改查
-- 简历自定义 CSS 绑定
-- PostgreSQL + ORM
-
-### 约束
-
-- 不解析 Markdown
-- 不生成 HTML
-- 只返回原始数据
-- 所有资源需校验用户归属
+- 书写完成后运行 pnpm run build 和 pnpm run lint 检查代码质量
