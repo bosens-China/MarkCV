@@ -1,6 +1,7 @@
 server {
   listen 80;
   server_name _;
+  sendfile off;
 
   root /usr/share/nginx/html;
   index index.html;
