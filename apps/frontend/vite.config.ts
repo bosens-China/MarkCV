@@ -6,9 +6,9 @@ import { NaiveUiResolver } from 'unplugin-vue-components/resolvers';
 import { fileURLToPath, URL } from 'node:url';
 
 // https://vite.dev/config/
-export default defineConfig(({ command }) => {
+export default defineConfig(() => {
   return {
-    base: command === 'serve' ? '/' : '/MarkCV/',
+    base: '/',
     plugins: [
       vue(),
       UnoCSS(),
