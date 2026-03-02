@@ -100,9 +100,9 @@ jobs:
 
       - name: Compress Images
         run: |
-          gzip -c /tmp/backend-image.tar > /tmp/backend-image.tar.gz
-          gzip -c /tmp/frontend-image.tar > /tmp/frontend-image.tar.gz
-          ls -lh /tmp/*.tar.gz
+          gzip -c /tmp/backend-image.tar > ./backend-image.tar.gz
+          gzip -c /tmp/frontend-image.tar > ./frontend-image.tar.gz
+          ls -lh *.tar.gz
 
       - name: Upload Images to Server
         uses: appleboy/scp-action@v0.1.7
@@ -111,7 +111,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           password: ${{ secrets.SERVER_PASSWORD }}
           target: /tmp
-          source: "/tmp/backend-image.tar.gz,/tmp/frontend-image.tar.gz"
+          source: "backend-image.tar.gz,frontend-image.tar.gz"
           overwrite: true
 
       - name: Load Images and Restart Containers
