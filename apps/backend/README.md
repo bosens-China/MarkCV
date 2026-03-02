@@ -66,14 +66,4 @@ pnpm --filter @mark-cv/api dev
 docker build -f apps/backend/Dockerfile -t markcv-backend:latest .
 ```
 
-## 生产部署必填项（2026-03）
-
-使用仓库根目录的 `docker-compose.prod.yml` 部署后端时，以下变量必须显式设置：
-
-- `FRONTEND_URL`
-- `GITHUB_CALLBACK_URL`
-- `GITHUB_CLIENT_ID`
-- `GITHUB_CLIENT_SECRET`
-- `COOKIE_SECRET`
-
-另外请确认 GitHub OAuth App 的 `Authorization callback URL` 与 `GITHUB_CALLBACK_URL` 完全一致。
+使用仓库根目录的 `docker-compose.prod.yml` 部署时，以下环境变量必须显式设置，否则服务将无法启动：`FRONTEND_URL`、`GITHUB_CALLBACK_URL`、`GITHUB_CLIENT_ID`、`GITHUB_CLIENT_SECRET`、`COOKIE_SECRET`。另外请确认 GitHub OAuth App 的 `Authorization callback URL` 与 `GITHUB_CALLBACK_URL` 完全一致。

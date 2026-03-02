@@ -37,10 +37,4 @@ pnpm --filter @mark-cv/frontend build
 docker build -f apps/frontend/Dockerfile -t markcv-frontend:latest .
 ```
 
-## 生产部署说明（2026-03）
-
-前端容器使用 Nginx 反向代理 `/api/v1` 到后端，默认目标为 `http://backend:3000`。
-
-如需覆盖，请在 `docker-compose.prod.yml` 中设置：
-
-- `BACKEND_URL`（示例：`http://backend:3000` 或你的内部网关地址）
+前端容器使用 Nginx 反向代理 `/api/v1` 到后端，默认目标为 `http://backend:3000`。如需覆盖，请在 `docker-compose.prod.yml` 中设置 `BACKEND_URL`（如 `http://backend:3000` 或你的内部网关地址）。

@@ -11,8 +11,6 @@
 ![Tech Stack](https://img.shields.io/badge/Fastify-000000?logo=fastify&logoColor=white)
 ![Tech Stack](https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white)
 
----
-
 ## 功能特点
 
 - ✍️ **Markdown 编辑** - 使用熟悉的 Markdown 语法编写简历
@@ -21,18 +19,14 @@
 - ☁️ **云端同步** - GitHub 登录，数据自动同步
 - 🎨 **自定义样式** - 支持主题色、字体、边距自定义
 
----
-
 ## 版本选择
 
-| 版本 | 地址 | 特点 |
-|------|------|------|
-| **在线版（推荐）** | https://markcv.xiaowo.live | GitHub 登录、云端同步、多设备访问 |
-| **纯本地版** | https://bosens-china.github.io/MarkCV/ | 无需登录、数据存在浏览器、纯静态 |
+| 版本               | 地址                                   | 特点                              |
+| ------------------ | -------------------------------------- | --------------------------------- |
+| **在线版（推荐）** | https://markcv.xiaowo.live             | GitHub 登录、云端同步、多设备访问 |
+| **纯本地版**       | https://bosens-china.github.io/MarkCV/ | 无需登录、数据存在浏览器、纯静态  |
 
 > 纯本地版适合不想使用联网功能的用户，数据完全保留在本地浏览器。
-
----
 
 ## 快速开始
 
@@ -77,8 +71,6 @@ pnpm --filter @mark-cv/frontend dev
 - 前端：http://localhost:5173
 - 后端：http://localhost:3000
 
----
-
 ## 配置 GitHub OAuth
 
 1. 登录 GitHub → Settings → Developer settings → [OAuth Apps](https://github.com/settings/developers)
@@ -90,8 +82,6 @@ pnpm --filter @mark-cv/frontend dev
 4. 保存后获取 **Client ID** 和 **Client Secret**
 5. 填入 `.env` 或 `.env.prod` 文件
 
----
-
 ## 项目结构
 
 ```
@@ -102,23 +92,29 @@ docker-compose.prod.yml  # 生产部署配置
 ```
 
 详细说明：
+
 - [前端文档](apps/frontend/README.md)
 - [后端文档](apps/backend/README.md)
 
----
-
 ## 环境变量
 
-| 变量 | 说明 | 示例 |
-|------|------|------|
-| `GITHUB_CLIENT_ID` | GitHub OAuth Client ID | `Iv1.xxx` |
-| `GITHUB_CLIENT_SECRET` | GitHub OAuth Client Secret | `xxx` |
-| `GITHUB_CALLBACK_URL` | OAuth 回调地址 | `https://xxx/api/v1/auth/github/callback` |
-| `FRONTEND_URL` | 前端地址 | `https://xxx` |
-| `COOKIE_SECRET` | Cookie 加密密钥 | 随机字符串（至少32位）|
-| `POSTGRES_PASSWORD` | 数据库密码 | 随机字符串 |
+### 必填项（生产部署）
 
----
+使用 `docker-compose.prod.yml` 部署时，以下变量必须显式设置，否则服务将无法启动：
+
+| 变量                   | 说明                        | 示例                                      |
+| ---------------------- | --------------------------- | ----------------------------------------- |
+| `GITHUB_CLIENT_ID`     | GitHub OAuth Client ID      | `Iv1.xxx`                                 |
+| `GITHUB_CLIENT_SECRET` | GitHub OAuth Client Secret  | `xxx`                                     |
+| `GITHUB_CALLBACK_URL`  | OAuth 回调地址              | `https://xxx/api/v1/auth/github/callback` |
+| `FRONTEND_URL`         | 前端地址                    | `https://xxx`                             |
+| `COOKIE_SECRET`        | Cookie 加密密钥（至少32位） | `your-random-secret-key`                  |
+
+### 可选项
+
+| 变量                | 说明       | 默认值   |
+| ------------------- | ---------- | -------- |
+| `POSTGRES_PASSWORD` | 数据库密码 | 随机生成 |
 
 ## Docker 镜像
 
@@ -132,8 +128,6 @@ docker pull boses/markcv-backend:latest
 docker pull boses/markcv-frontend:latest
 ```
 
----
-
 ## 贡献
 
 欢迎 Issue 和 PR！
@@ -141,18 +135,6 @@ docker pull boses/markcv-frontend:latest
 - 提交 Issue: https://github.com/bosens-China/MarkCV/issues
 - 提交 PR: https://github.com/bosens-China/MarkCV/pulls
 
----
-
 ## License
 
 [MIT](LICENSE)
-
-## 生产部署必填项（2026-03）
-
-使用 `docker-compose.prod.yml` 部署时，以下变量必须在 `.env.prod` 中显式设置，否则 `docker compose` 会直接报错退出：
-
-- `FRONTEND_URL`
-- `GITHUB_CALLBACK_URL`
-- `GITHUB_CLIENT_ID`
-- `GITHUB_CLIENT_SECRET`
-- `COOKIE_SECRET`
