@@ -12,7 +12,6 @@ export default defineConfig(() => {
     plugins: [
       vue(),
       UnoCSS(),
-
       Components({
         resolvers: [NaiveUiResolver()],
       }),
@@ -27,6 +26,20 @@ export default defineConfig(() => {
         '/api/v1': {
           target: 'http://localhost:3000',
           changeOrigin: true,
+        },
+      },
+    },
+    build: {
+      target: 'es2019',
+      sourcemap: false,
+      reportCompressedSize: false,
+      chunkSizeWarningLimit: 900,
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'vendor-vue': ['vue', 'vue-router', 'pinia'],
+            'vendor-ui': ['naive-ui'],
+          },
         },
       },
     },
